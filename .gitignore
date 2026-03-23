@@ -96,3 +96,11 @@ octave-workspace
 *.d
 *.map
 *.lst
+
+# ==== Claude Code ====
+.claude/settings*.json
+.claude/cache/
+.claude/backups/
+.claude/debug/
+.claude/plans/
+# 注意：.claude/skills/ 不忽略，纳入版本管理
