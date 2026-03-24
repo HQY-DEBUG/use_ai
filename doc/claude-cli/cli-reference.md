@@ -1,0 +1,117 @@
+# CLI 参考
+
+> 文件：`cli-reference.md`  版本：v1.0  日期：2026-03-24
+
+> Claude Code 命令行界面的完整参考，包括命令和标志。
+
+---
+
+## CLI 命令
+
+您可以使用这些命令启动会话、管道内容、恢复对话和管理更新：
+
+| 命令                               | 描述                                                             | 示例                                                  |
+| ---------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------- |
+| `claude`                           | 启动交互式会话                                                   | `claude`                                              |
+| `claude "query"`                   | 使用初始提示启动交互式会话                                       | `claude "explain this project"`                       |
+| `claude -p "query"`                | 通过 SDK 查询，然后退出                                          | `claude -p "explain this function"`                   |
+| `cat file \| claude -p "query"`    | 处理管道内容                                                     | `cat logs.txt \| claude -p "explain"`                 |
+| `claude -c`                        | 在当前目录中继续最近的对话                                       | `claude -c`                                           |
+| `claude -c -p "query"`             | 通过 SDK 继续                                                    | `claude -c -p "Check for type errors"`                |
+| `claude -r "<session>" "query"`    | 按 ID 或名称恢复会话                                             | `claude -r "auth-refactor" "Finish this PR"`          |
+| `claude update`                    | 更新到最新版本                                                   | `claude update`                                       |
+| `claude auth login`                | 登录您的 Anthropic 账户。使用 `--email` 预填充邮件，`--sso` 强制 SSO 身份验证 | `claude auth login --email user@example.com --sso` |
+| `claude auth logout`               | 从您的 Anthropic 账户登出                                        | `claude auth logout`                                  |
+| `claude auth status`               | 以 JSON 格式显示身份验证状态。使用 `--text` 获取人类可读的输出  | `claude auth status`                                  |
+| `claude agents`                    | 列出所有已配置的 subagents，按来源分组                           | `claude agents`                                       |
+| `claude mcp`                       | 配置 Model Context Protocol (MCP) 服务器                        | 请参阅 MCP 文档                                       |
+| `claude remote-control`            | 启动 Remote Control 服务器以从 Claude.ai 或 Claude 应用控制 Claude Code | `claude remote-control --name "My Project"`   |
+
+---
+
+## CLI 标志
+
+使用这些命令行标志自定义 Claude Code 的行为：
+
+| 标志                                   | 描述                                                                                   | 示例                                                                |
+| -------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `--add-dir`                            | 添加额外的工作目录供 Claude 访问                                                       | `claude --add-dir ../apps ../lib`                                   |
+| `--agent`                              | 为当前会话指定代理                                                                     | `claude --agent my-custom-agent`                                    |
+| `--agents`                             | 通过 JSON 动态定义自定义 subagents                                                    | `claude --agents '{"reviewer":{"description":"...","prompt":"..."}}'` |
+| `--allow-dangerously-skip-permissions` | 启用权限绕过作为选项，而不立即激活它                                                   | `claude --permission-mode plan --allow-dangerously-skip-permissions` |
+| `--allowedTools`                       | 无需提示权限即可执行的工具                                                             | `"Bash(git log *)" "Bash(git diff *)" "Read"`                       |
+| `--append-system-prompt`               | 将自定义文本附加到默认系统提示的末尾                                                   | `claude --append-system-prompt "Always use TypeScript"`             |
+| `--append-system-prompt-file`          | 从文件加载额外的系统提示文本并附加到默认提示                                           | `claude --append-system-prompt-file ./extra-rules.txt`              |
+| `--betas`                              | 要包含在 API 请求中的 Beta 标头（仅限 API 密钥用户）                                   | `claude --betas interleaved-thinking`                               |
+| `--chrome`                             | 启用 Chrome 浏览器集成以进行网络自动化和测试                                           | `claude --chrome`                                                   |
+| `--continue`, `-c`                     | 加载当前目录中最近的对话                                                               | `claude --continue`                                                 |
+| `--dangerously-skip-permissions`       | 跳过所有权限提示（谨慎使用）                                                           | `claude --dangerously-skip-permissions`                             |
+| `--debug`                              | 启用调试模式，可选类别过滤                                                             | `claude --debug "api,mcp"`                                          |
+| `--disable-slash-commands`             | 为此会话禁用所有 skills 和命令                                                         | `claude --disable-slash-commands`                                   |
+| `--disallowedTools`                    | 从模型的上下文中删除的工具，无法使用                                                   | `"Bash(git log *)" "Edit"`                                          |
+| `--effort`                             | 为当前会话设置工作量级别。选项：`low`、`medium`、`high`、`max`（仅限 Opus 4.6）       | `claude --effort high`                                              |
+| `--fallback-model`                     | 当默认模型过载时启用自动回退到指定模型（仅打印模式）                                   | `claude -p --fallback-model sonnet "query"`                         |
+| `--fork-session`                       | 恢复时，创建新的会话 ID 而不是重用原始 ID                                              | `claude --resume abc123 --fork-session`                             |
+| `--from-pr`                            | 恢复链接到特定 GitHub PR 的会话。接受 PR 号或 URL                                      | `claude --from-pr 123`                                              |
+| `--ide`                                | 如果恰好有一个有效的 IDE 可用，则在启动时自动连接到 IDE                                | `claude --ide`                                                      |
+| `--init`                               | 运行初始化 hooks 并启动交互模式                                                        | `claude --init`                                                     |
+| `--init-only`                          | 运行初始化 hooks 并退出（无交互式会话）                                                | `claude --init-only`                                                |
+| `--include-partial-messages`           | 在输出中包含部分流事件（需要 `--print` 和 `--output-format=stream-json`）              | `claude -p --output-format stream-json --include-partial-messages "query"` |
+| `--input-format`                       | 为打印模式指定输入格式（选项：`text`、`stream-json`）                                  | `claude -p --output-format json --input-format stream-json`         |
+| `--json-schema`                        | 在代理完成其工作流后获得与 JSON Schema 匹配的验证 JSON 输出（仅打印模式）              | `claude -p --json-schema '{"type":"object",...}' "query"`           |
+| `--maintenance`                        | 运行维护 hooks 并退出                                                                  | `claude --maintenance`                                              |
+| `--max-budget-usd`                     | API 调用前停止的最大美元金额（仅打印模式）                                             | `claude -p --max-budget-usd 5.00 "query"`                           |
+| `--max-turns`                          | 限制代理转数（仅打印模式）。达到限制时以错误退出。默认无限制                           | `claude -p --max-turns 3 "query"`                                   |
+| `--mcp-config`                         | 从 JSON 文件或字符串加载 MCP 服务器（以空格分隔）                                      | `claude --mcp-config ./mcp.json`                                    |
+| `--model`                              | 为当前会话设置模型，使用别名（`sonnet` 或 `opus`）或模型的完整名称                     | `claude --model claude-sonnet-4-6`                                  |
+| `--name`, `-n`                         | 为会话设置显示名称，显示在 `/resume` 和终端标题中                                      | `claude -n "my-feature-work"`                                       |
+| `--no-chrome`                          | 为此会话禁用 Chrome 浏览器集成                                                         | `claude --no-chrome`                                                |
+| `--no-session-persistence`             | 禁用会话持久化，以便会话不会保存到磁盘且无法恢复（仅打印模式）                         | `claude -p --no-session-persistence "query"`                        |
+| `--output-format`                      | 为打印模式指定输出格式（选项：`text`、`json`、`stream-json`）                          | `claude -p "query" --output-format json`                            |
+| `--permission-mode`                    | 以指定的权限模式开始                                                                   | `claude --permission-mode plan`                                     |
+| `--permission-prompt-tool`             | 指定 MCP 工具以在非交互模式下处理权限提示                                              | `claude -p --permission-prompt-tool mcp_auth_tool "query"`          |
+| `--plugin-dir`                         | 仅为此会话从目录加载插件                                                               | `claude --plugin-dir ./my-plugins`                                  |
+| `--print`, `-p`                        | 打印响应而不进入交互模式                                                               | `claude -p "query"`                                                 |
+| `--remote`                             | 在 claude.ai 上创建新的网络会话，提供任务描述                                          | `claude --remote "Fix the login bug"`                               |
+| `--remote-control`, `--rc`             | 启动启用了 Remote Control 的交互式会话                                                 | `claude --remote-control "My Project"`                              |
+| `--resume`, `-r`                       | 按 ID 或名称恢复特定会话，或显示交互式选择器以选择会话                                 | `claude --resume auth-refactor`                                     |
+| `--session-id`                         | 为对话使用特定的会话 ID（必须是有效的 UUID）                                           | `claude --session-id "550e8400-e29b-41d4-a716-446655440000"`        |
+| `--setting-sources`                    | 逗号分隔的设置源列表以加载（`user`、`project`、`local`）                               | `claude --setting-sources user,project`                             |
+| `--settings`                           | 设置 JSON 文件的路径或 JSON 字符串以加载其他设置                                       | `claude --settings ./settings.json`                                 |
+| `--strict-mcp-config`                  | 仅使用来自 `--mcp-config` 的 MCP 服务器，忽略所有其他 MCP 配置                         | `claude --strict-mcp-config --mcp-config ./mcp.json`                |
+| `--system-prompt`                      | 用自定义文本替换整个系统提示                                                           | `claude --system-prompt "You are a Python expert"`                  |
+| `--system-prompt-file`                 | 从文件加载系统提示，替换默认提示                                                       | `claude --system-prompt-file ./custom-prompt.txt`                   |
+| `--teleport`                           | 在本地终端中恢复网络会话                                                               | `claude --teleport`                                                 |
+| `--teammate-mode`                      | 设置 agent team 队友的显示方式：`auto`（默认）、`in-process` 或 `tmux`                | `claude --teammate-mode in-process`                                 |
+| `--tools`                              | 限制 Claude 可以使用的内置工具。使用 `""` 禁用所有，`"default"` 表示全部              | `claude --tools "Bash,Edit,Read"`                                   |
+| `--verbose`                            | 启用详细日志记录，显示完整的逐轮输出                                                   | `claude --verbose`                                                  |
+| `--version`, `-v`                      | 输出版本号                                                                             | `claude -v`                                                         |
+| `--worktree`, `-w`                     | 在隔离的 git worktree 中启动 Claude                                                    | `claude -w feature-auth`                                            |
+
+---
+
+## 系统提示标志
+
+Claude Code 提供四个标志用于自定义系统提示。所有四个都在交互和非交互模式下工作。
+
+| 标志                            | 行为                     | 示例                                                        |
+| ------------------------------- | ------------------------ | ----------------------------------------------------------- |
+| `--system-prompt`               | 替换整个默认提示         | `claude --system-prompt "You are a Python expert"`          |
+| `--system-prompt-file`          | 用文件内容替换           | `claude --system-prompt-file ./prompts/review.txt`          |
+| `--append-system-prompt`        | 附加到默认提示           | `claude --append-system-prompt "Always use TypeScript"`     |
+| `--append-system-prompt-file`   | 将文件内容附加到默认提示 | `claude --append-system-prompt-file ./style-rules.txt`      |
+
+`--system-prompt` 和 `--system-prompt-file` 互斥。附加标志可以与任一替换标志组合。
+
+对于大多数用例，使用附加标志。附加保留 Claude Code 的内置功能，同时添加您的要求。仅当您需要对系统提示进行完全控制时，才使用替换标志。
+
+---
+
+## 另请参阅
+
+- **Chrome 扩展**：浏览器自动化和网络测试
+- **交互模式**：快捷键、输入模式和交互功能
+- **快速入门指南**：Claude Code 入门
+- **常见工作流**：高级工作流和模式
+- **设置**：配置选项
+- **Agent SDK 文档**：编程使用和集成
