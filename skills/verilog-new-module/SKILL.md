@@ -17,7 +17,7 @@ disable-model-invocation: true
 3. 使用以下模板生成文件，替换所有占位符：
    - `MODULE_NAME` → 模块名（小写下划线）
    - `FUNC_DESC` → 功能描述
-   - `TODAY` → 今天日期（格式 YYYY/MM/DD）
+   - `TODAY` → 今天日期（格式 YYYY/MM/DD），通过 PowerShell 获取：`Get-Date -Format "yyyy/MM/dd"`
 
 ## 文件模板
 

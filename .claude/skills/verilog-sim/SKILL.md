@@ -16,16 +16,16 @@ disable-model-invocation: true
 2. 若未指定 DUT，自动搜索当前目录下与 TB 文件名对应的 `.v` 文件（去掉 `_tb` 后缀）
    - 例如：`uart_tx_tb.v` → 自动查找 `uart_tx.v`
 3. 检查 iverilog 是否已安装：
-   ```bash
-   which iverilog
+   ```powershell
+   Get-Command iverilog -ErrorAction SilentlyContinue
    ```
    若未安装，输出提示后终止
 4. 使用 iverilog 编译：
-   ```bash
+   ```powershell
    iverilog -o sim_out.vvp <tb文件> <dut文件...>
    ```
 5. 运行仿真：
-   ```bash
+   ```powershell
    vvp sim_out.vvp
    ```
 6. 解析仿真输出：
@@ -33,14 +33,14 @@ disable-model-invocation: true
    - 检测 `$error` / `$fatal` / `FAILED` / `ERROR` 关键字
    - 检测仿真是否正常结束（`$finish`）还是超时/异常
 7. 清理临时文件：
-   ```bash
-   rm -f sim_out.vvp
+   ```powershell
+   Remove-Item -Force sim_out.vvp -ErrorAction SilentlyContinue
    ```
 8. 输出仿真报告
 
 ## 注意事项
 
-- 若 iverilog 未安装，输出提示：`iverilog 未安装，请先执行 sudo apt install iverilog 或 pacman -S iverilog`
+- 若 iverilog 未安装，输出提示：`iverilog 未安装，请先执行 winget install iverilog 或 choco install iverilog`
 - 不修改任何源文件
 - 不执行 git 提交
 

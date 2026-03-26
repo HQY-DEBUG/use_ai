@@ -16,7 +16,7 @@ disable-model-invocation: true
 2. 若未提供状态列表，默认使用：`IDLE, RUN, DONE, ERROR`
 3. 生成 `.v` 文件，替换以下占位符：
    - `MODULE_NAME` → 模块名（小写下划线）
-   - `TODAY` → 今天日期（格式 YYYY/MM/DD）
+   - `TODAY` → 今天日期（格式 YYYY/MM/DD），通过 PowerShell 获取：`Get-Date -Format "yyyy/MM/dd"`
    - 状态参数与 case 分支 → 根据实际状态列表展开
 
 ## 生成模板（以 IDLE/RUN/DONE/ERROR 为例）

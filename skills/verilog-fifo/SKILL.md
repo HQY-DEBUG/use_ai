@@ -19,7 +19,7 @@ disable-model-invocation: true
    - DATA_W → 数据位宽
    - DEPTH → 深度
    - ADDR_W → 地址位宽
-   - TODAY → 当前日期（YYYY/MM/DD）
+   - TODAY → 当前日期（YYYY/MM/DD），通过 PowerShell 获取：`Get-Date -Format "yyyy/MM/dd"`
 4. 写入 `<模块名>.v` 文件到当前工作目录
 5. 告知用户文件路径，提示按需调整参数
 6. 提醒用户执行 git commit
