@@ -144,7 +144,6 @@ octave-workspace
 .claude/backups/
 .claude/debug/
 .claude/plans/
-# 注意：.claude/skills/ 不忽略，纳入版本管理
 ```
 
 ---
