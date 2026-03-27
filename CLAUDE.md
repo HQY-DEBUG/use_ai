@@ -10,14 +10,73 @@
 
 本仓库（`use_ai`）为 AI 协作配置仓库，存放振镜控制板工程的 AI 使用规范与技能脚本：
 
-| 目录 / 文件    | 用途                              |
-|-------------|-----------------------------------|
-| `rule/`     | 通用 AI 协作规则（`rule.md`）          |
-| `.claude/skills/` | Claude Code 自定义技能脚本        |
-| `CLAUDE.md` | 项目级行为规范（本文件）               |
-| `README.md` | 仓库说明                           |
+| 目录 / 文件         | 用途                                      |
+|-------------------|------------------------------------------|
+| `rule/`           | 通用 AI 协作规则（`rule.md`）及各语言 Copilot 规范  |
+| `.claude/skills/` | Claude Code 技能脚本（平铺，由 Claude Code 加载）  |
+| `skills/`         | 技能脚本按语言分类存档（与 `.claude/skills/` 内容一致） |
+| `CLAUDE.md`       | 项目级行为规范（本文件）                          |
+| `README.md`       | 仓库说明                                   |
 
 > 振镜控制板工程（Zynq FPGA）的实际代码位于独立的工程仓库。
+
+---
+
+## 可用技能（Skills）
+
+用 `/技能名` 调用，详细说明见各 `SKILL.md`。
+
+### 通用
+
+| 技能 | 功能 |
+|------|------|
+| `/gitignore [分类...]` | 生成或更新 `.gitignore`（os/vscode/qt/python/vitis/vivado/matlab/c/claude） |
+| `/doc-update <文件> [版本] [说明]` | 更新 Markdown 文档版本记录表 |
+| `/axi-interface <模块名> lite\|stream [位宽]` | 生成 AXI-Lite / AXI-Stream 从机接口模板 |
+
+### C / C++
+
+| 技能 | 功能 |
+|------|------|
+| `/c-new-file <文件名> [描述]` | 新建 `.c`/`.h` 文件对（含规范文件头） |
+| `/c-header <.c文件>` | 为已有 `.c` 生成或同步 `.h`（函数声明、include guard） |
+| `/c-struct <结构体名> <字段...>` | 生成结构体定义（Doxygen 注释、字段对齐） |
+| `/c-update <文件> <版本> <说明>` | 更新文件头版本号和修改记录 |
+| `/c-review <文件>` | 审查是否符合编码规范 |
+| `/c-lint <文件>` | 静态质量审查（空指针/资源泄漏/未检查返回值） |
+| `/c-conventions` | 加载 C/C++ 规范背景知识（自动触发） |
+
+### Qt C++
+
+| 技能 | 功能 |
+|------|------|
+| `/qt-new-class <类名> [描述]` | 新建 Qt 类（Q_OBJECT、信号槽、线程安全框架） |
+| `/qt-new-widget <类名> [描述]` | 新建 QWidget UI 组件模板 |
+
+### Verilog / SystemVerilog
+
+| 技能 | 功能 |
+|------|------|
+| `/verilog-new-module <模块名> [描述]` | 新建模块文件（规范文件头、端口框架） |
+| `/verilog-update <文件> <版本> <说明>` | 更新文件头版本号和修改记录 |
+| `/verilog-inst <文件> [实例名]` | 从模块定义生成对齐例化代码 |
+| `/verilog-doc <文件> [输出路径]` | 提取端口/参数，生成 Markdown 接口文档 |
+| `/verilog-hier <顶层> <目录/文件...>` | 分析模块层次树，标注 IP 核/循环依赖 |
+| `/verilog-fsm <模块名> <状态列表>` | 生成 FSM 模板（二段式/三段式） |
+| `/verilog-fifo <模块名> sync\|async [深度] [位宽]` | 生成同步/异步 FIFO 模板 |
+| `/verilog-pipeline <模块名> <级数> [位宽]` | 生成带握手的流水线模板 |
+| `/verilog-cdc <模块名> 1bit\|handshake\|pulse` | 生成 CDC 同步器模板 |
+| `/verilog-bram <模块名> sp\|dp\|rom [深度] [位宽] [hex]` | 生成 BRAM/ROM 模板 |
+| `/verilog-regmap <模块名> <寄存器规格...>` | 生成 AXI-Lite 寄存器映射模块 |
+| `/verilog-tb <模块名> [端口]` | 生成 Testbench 框架 |
+| `/verilog-tb-assert <tb文件>` | 为 Testbench 添加断言和结果统计 |
+| `/verilog-sim <tb文件> [dut文件...]` | iverilog 编译运行仿真，报告通过/失败 |
+| `/verilog-review <文件>` | 审查是否符合编码规范 |
+| `/verilog-lint <文件>` | RTL 质量审查（与工具无关） |
+| `/verilog-resource <文件>` | 估算 LUT/FF/BRAM/DSP 资源用量 |
+| `/verilog-timing <文件> [目标频率]` | 时序风险分析，生成 XDC 约束建议 |
+| `/verilog-constraint <文件> [主时钟MHz]` | 生成 Vivado XDC 时序约束文件 |
+| `/verilog-conventions` | 加载 Verilog 规范背景知识（自动触发） |
 
 ---
 
