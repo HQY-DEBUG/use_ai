@@ -173,4 +173,4 @@
 
 **DDR 布局**：代码区 → PROG(32MB) → CORR(8MB) → JUMP(4KB) → DMA_X/Y/Z(各10MB) → LIST(16MB)
 
-**PL 端（Verilog）**：时序用 `<=`，组合用 `=`；复位统一命名（低有效 `rst_n`，高有效 `rst`）
+**PL 端（Verilog）**：时序用 `<=`，组合用 `=`；复位统一命名（低有效 `rstn`，高有效 `rst`）
