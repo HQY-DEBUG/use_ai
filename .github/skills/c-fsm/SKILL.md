@@ -198,7 +198,3 @@ static void fsm_exit_STATE1(ModuleFsm *fsm)  { (void)fsm; }
 - 生成后提示用户在各 `run_*` 函数内填写转移条件，调用 `fsm_trans()`
 - `STATE_MAX` 仅用于数组边界，不作为有效状态
 - 若模块已有 `.c`/`.h`，询问是否追加到现有文件或新建 `_fsm` 子文件
-
-## 参考示例
-
-完整示例见 [example/cmd_fsm.c](example/cmd_fsm.c)

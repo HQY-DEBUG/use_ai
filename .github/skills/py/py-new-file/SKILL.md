@@ -166,7 +166,3 @@ if __name__ == "__main__":
 - 告知生成文件路径和所用模板类型
 - 提醒文件放入 `PC/py_code/` 目录
 - 提示执行 `git commit`
-
-## 参考示例
-
-完整示例见 [example/data_parser.py](example/data_parser.py)

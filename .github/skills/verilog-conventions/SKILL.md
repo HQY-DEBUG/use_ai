@@ -98,7 +98,3 @@ module foo #(
 ```
 
 修改记录仅保留最近 **3** 个版本，最新在最前。
-
-## 参考示例
-
-符合所有规范的完整模块示例见 [example/axis_data_width_conv.v](example/axis_data_width_conv.v)（AXI-Stream 位宽转换）

@@ -221,7 +221,3 @@ end
 
 endmodule
 ```
-
-## 参考示例
-
-完整示例见 [example/reg_ctrl.v](example/reg_ctrl.v)（AXI-Lite）

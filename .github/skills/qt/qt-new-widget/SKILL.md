@@ -189,7 +189,3 @@ void <类名>::drawContent(QPainter &painter)
 - `paintEvent` 内**禁止**耗时操作（网络、文件 IO、大量计算）
 - 跨线程更新数据必须通过信号槽（`Qt::QueuedConnection`），不可直接调用槽函数
 - `update()` 只是标记重绘请求，Qt 会在事件循环中合并多次调用
-
-## 参考示例
-
-完整示例见 [example/waveform_widget.h](example/waveform_widget.h) 和 [example/waveform_widget.cpp](example/waveform_widget.cpp)

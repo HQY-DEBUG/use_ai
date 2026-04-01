@@ -54,7 +54,3 @@ disable-model-invocation: true
 - 内容变更：次版本 +1（`v1.0` → `v1.1`）
 - 结构重大调整：主版本 +1（`v1.x` → `v2.0`）
 - 若调用时未提供版本号，自动将当前最新版本次版本 +1
-
-## 参考示例
-
-更新示例见 [example/version_update_example.md](example/version_update_example.md)

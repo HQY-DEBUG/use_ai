@@ -104,7 +104,3 @@ endmodule
 4. 写入文件后告知用户文件路径
 5. 提示用户：状态位宽需根据实际状态数量调整（N个状态需 $\lceil\log_2 N\rceil$ 位）
 6. 提醒用户执行 `git commit`
-
-## 参考示例
-
-完整生成示例见 [example/xy2_ctrl_fsm.v](example/xy2_ctrl_fsm.v)（XY2-100 发送控制状态机，4状态）

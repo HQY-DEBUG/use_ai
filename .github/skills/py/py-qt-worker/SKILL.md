@@ -230,7 +230,3 @@ self._worker.wait()
 - 所有跨线程数据传递通过 `pyqtSignal` 发出，Qt 自动处理线程安全
 - `stop()` 只设置标志，需配合 `wait()` 确保线程完全退出
 - `_sock.settimeout(0.5)` 保证 `stop()` 后最多 0.5s 退出循环
-
-## 参考示例
-
-完整示例见 [example/udp_worker.py](example/udp_worker.py)
