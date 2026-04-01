@@ -51,7 +51,7 @@ localparam [1:0] ERROR = 2'd3 ;
 
 // ---- 状态寄存器声明 ----//
 reg [1:0] state_r      ;  // 当前状态
-reg [1:0] state_next_r ;  // 下一状态
+reg [1:0] state_next   ;  // 下一状态
 
 // ---- 状态寄存器（时序逻辑）----//
 always @(posedge clk or negedge rst_n)
@@ -62,35 +62,35 @@ always @(posedge clk or negedge rst_n)
       end
     else
       begin
-        state_r <= state_next_r ;
+        state_r <= state_next ;
       end
   end
 
 // ---- 次态逻辑（组合逻辑）----//
 always @(*)
   begin
-    state_next_r = state_r ;  // 默认保持当前状态
+    state_next = state_r ;  // 默认保持当前状态
     case (state_r)
       IDLE :
         begin
           if (i_xxx == 1'b1)
-            state_next_r = RUN ;
+            state_next = RUN ;
         end
       RUN :
         begin
-          state_next_r = DONE ;
+          state_next = DONE ;
         end
       DONE :
         begin
-          state_next_r = IDLE ;
+          state_next = IDLE ;
         end
       ERROR :
         begin
-          state_next_r = IDLE ;
+          state_next = IDLE ;
         end
       default :
         begin
-          state_next_r = IDLE ;
+          state_next = IDLE ;
         end
     endcase
   end

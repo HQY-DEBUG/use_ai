@@ -76,33 +76,33 @@ module <模块名> #(
 );
 
 // ---- 内部寄存器 ----//
-reg [DATA_W-1:0] reg0_r;
-reg [DATA_W-1:0] reg1_r;
+reg [DATA_W-1:0] reg0;
+reg [DATA_W-1:0] reg1;
 
 // ---- 写握手状态 ----//
-reg              aw_en_r;
-reg [ADDR_W-1:0] aw_addr_r;
+reg              aw_en;
+reg [ADDR_W-1:0] aw_addr;
 
-assign s_axi_awready = aw_en_r;
-assign s_axi_wready  = aw_en_r;
+assign s_axi_awready = aw_en;
+assign s_axi_wready  = aw_en;
 assign s_axi_bresp   = 2'b00;      // OKAY
-assign s_axi_bvalid  = aw_en_r;    // 简化：与 wready 同拍响应
+assign s_axi_bvalid  = aw_en;    // 简化：与 wready 同拍响应
 
 // 写地址 + 写数据握手（单拍完成）
 always @(posedge s_axi_aclk or negedge s_axi_aresetn)
 begin
     if (!s_axi_aresetn)
     begin
-        aw_en_r   <= 1'b1;
-        aw_addr_r <= {ADDR_W{1'b0}};
+        aw_en   <= 1'b1;
+        aw_addr <= {ADDR_W{1'b0}};
     end
-    else if (s_axi_awvalid && s_axi_wvalid && aw_en_r)
+    else if (s_axi_awvalid && s_axi_wvalid && aw_en)
     begin
-        aw_addr_r <= s_axi_awaddr;
-        aw_en_r   <= 1'b0;          // 锁住，等待 bready
+        aw_addr <= s_axi_awaddr;
+        aw_en   <= 1'b0;          // 锁住，等待 bready
     end
     else if (s_axi_bready)
-        aw_en_r   <= 1'b1;
+        aw_en   <= 1'b1;
 end
 
 // 写寄存器
@@ -110,53 +110,53 @@ always @(posedge s_axi_aclk or negedge s_axi_aresetn)
 begin
     if (!s_axi_aresetn)
     begin
-        reg0_r <= {DATA_W{1'b0}};
-        reg1_r <= {DATA_W{1'b0}};
+        reg0 <= {DATA_W{1'b0}};
+        reg1 <= {DATA_W{1'b0}};
     end
-    else if (s_axi_wvalid && aw_en_r)
+    else if (s_axi_wvalid && aw_en)
     begin
-        case (aw_addr_r[ADDR_W-1:2])   // 字节地址转字地址
-            0: reg0_r <= s_axi_wdata;
-            1: reg1_r <= s_axi_wdata;
+        case (aw_addr[ADDR_W-1:2])   // 字节地址转字地址
+            0: reg0 <= s_axi_wdata;
+            1: reg1 <= s_axi_wdata;
             default: ;
         endcase
     end
 end
 
 // 读握手（单拍）
-reg              ar_valid_r;
-reg [ADDR_W-1:0] ar_addr_r;
-reg [DATA_W-1:0] r_data_r;
+reg              ar_valid;
+reg [ADDR_W-1:0] ar_addr;
+reg [DATA_W-1:0] r_data;
 
-assign s_axi_arready = ~ar_valid_r;
-assign s_axi_rvalid  = ar_valid_r;
+assign s_axi_arready = ~ar_valid;
+assign s_axi_rvalid  = ar_valid;
 assign s_axi_rresp   = 2'b00;
-assign s_axi_rdata   = r_data_r;
+assign s_axi_rdata   = r_data;
 
 always @(posedge s_axi_aclk or negedge s_axi_aresetn)
 begin
     if (!s_axi_aresetn)
     begin
-        ar_valid_r <= 1'b0;
-        ar_addr_r  <= {ADDR_W{1'b0}};
-        r_data_r   <= {DATA_W{1'b0}};
+        ar_valid <= 1'b0;
+        ar_addr  <= {ADDR_W{1'b0}};
+        r_data   <= {DATA_W{1'b0}};
     end
-    else if (s_axi_arvalid && !ar_valid_r)
+    else if (s_axi_arvalid && !ar_valid)
     begin
-        ar_valid_r <= 1'b1;
-        ar_addr_r  <= s_axi_araddr;
+        ar_valid <= 1'b1;
+        ar_addr  <= s_axi_araddr;
         case (s_axi_araddr[ADDR_W-1:2])
-            0: r_data_r <= reg0_r;
-            1: r_data_r <= reg1_r;
-            default: r_data_r <= {DATA_W{1'b0}};
+            0: r_data <= reg0;
+            1: r_data <= reg1;
+            default: r_data <= {DATA_W{1'b0}};
         endcase
     end
     else if (s_axi_rready)
-        ar_valid_r <= 1'b0;
+        ar_valid <= 1'b0;
 end
 
-assign reg0_o = reg0_r;
-assign reg1_o = reg1_r;
+assign reg0_o = reg0;
+assign reg1_o = reg1;
 
 endmodule
 ```

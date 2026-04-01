@@ -109,7 +109,7 @@ module MODULE_NAME #(
 reg [DATA_W-1:0] data_r ;
 
 // ---- req 信号（src域产生）----//
-reg req_r ;
+reg req ;
 
 // ---- 同步 req 到 dst 域 ----//
 (* ASYNC_REG = "TRUE" *) reg req_dst1_r ;
@@ -125,7 +125,7 @@ always @(posedge src_clk or negedge src_rst_n)
   begin
     if (src_rst_n == 1'b0)
       begin
-        req_r    <= 1'b0 ;
+        req    <= 1'b0 ;
         data_r   <= {DATA_W{1'b0}} ;
         ack_src1_r <= 1'b0 ;
         ack_src2_r <= 1'b0 ;
@@ -137,12 +137,12 @@ always @(posedge src_clk or negedge src_rst_n)
         if (src_valid && src_ready)
           begin
             data_r <= src_data ;
-            req_r  <= ~req_r   ;  // 翻转 req
+            req  <= ~req   ;  // 翻转 req
           end
       end
   end
 
-assign src_ready = (req_r == ack_src2_r) ;  // req 与 ack 相等时可接受新数据
+assign src_ready = (req == ack_src2_r) ;  // req 与 ack 相等时可接受新数据
 
 // ---- 目标时钟域逻辑 ----//
 always @(posedge dst_clk or negedge dst_rst_n)
@@ -155,7 +155,7 @@ always @(posedge dst_clk or negedge dst_rst_n)
       end
     else
       begin
-        req_dst1_r <= req_r    ;
+        req_dst1_r <= req    ;
         req_dst2_r <= req_dst1_r ;
         req_dst3_r <= req_dst2_r ;
       end
@@ -194,14 +194,14 @@ module MODULE_NAME (
 );
 
 // ---- 源域：脉冲展宽为电平翻转 ----//
-reg src_toggle_r ;
+reg src_toggle ;
 
 always @(posedge src_clk or negedge src_rst_n)
   begin
     if (src_rst_n == 1'b0)
-      src_toggle_r <= 1'b0 ;
+      src_toggle <= 1'b0 ;
     else if (src_pulse == 1'b1)
-      src_toggle_r <= ~src_toggle_r ;
+      src_toggle <= ~src_toggle ;
   end
 
 // ---- 目标域：两级同步 + 边沿检测 ----//
@@ -219,7 +219,7 @@ always @(posedge dst_clk or negedge dst_rst_n)
       end
     else
       begin
-        sync1_r <= src_toggle_r ;
+        sync1_r <= src_toggle ;
         sync2_r <= sync1_r      ;
         sync3_r <= sync2_r      ;
       end
