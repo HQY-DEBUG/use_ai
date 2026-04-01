@@ -152,7 +152,7 @@ system(cmd);
 ### 注意事项
 
 - 每次实质性修改完成后须执行 `git commit`，保存当前进度
-- **禁止**在提交信息中添加 `Co-Authored-By: Claude` 等 AI 署名行
+- **禁止**在提交信息中添加任何 AI 署名行（如 `Co-Authored-By: Claude`、`Co-authored-by: Copilot` 等）
 - 涉及接口变更时，在详细说明中标注影响范围
 
 ### 示例
