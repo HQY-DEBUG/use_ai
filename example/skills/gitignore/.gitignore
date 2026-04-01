@@ -1,0 +1,102 @@
+# ============================================================
+# .gitignore  --  FPGA/嵌入式项目通用忽略规则
+# 生成时间 : 2026/05/26
+# ============================================================
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+*.swp
+*.swo
+
+# ---- VSCode ----
+.vscode/
+*.code-workspace
+
+# ---- Qt ----
+*.pro.user
+*.pro.user.*
+build*/
+Makefile
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.qm
+*.prl
+*.so
+*.dll
+*.exe
+debug/
+release/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+*.egg
+.env
+.venv/
+venv/
+*.log
+.pytest_cache/
+
+# ---- Vitis ----
+*.sdk/
+*.hdf
+*.sysdef
+.metadata/
+RemoteSystemsTempFiles/
+*.launch
+*.xpr.bak
+platform/
+export/
+
+# ---- Vivado ----
+*.jou
+*.log
+*.str
+*.pb
+.Xil/
+vivado_pid*.str
+project_*.runs/
+project_*.cache/
+project_*.hw/
+project_*.ip_user_files/
+project_*.sim/
+*.mmi
+*.bit
+*.bin
+*.ltx
+*.xsa
+*.rpt
+*.dcp
+*.xpe
+
+# ---- MATLAB ----
+*.asv
+*.m~
+slprj/
+*.slxc
+
+# ---- C/C++ ----
+*.o
+*.a
+*.so
+*.out
+*.elf
+*.axf
+*.map
+*.lst
+
+# ---- 敏感文件 ----
+.env
+credentials.json
+secrets.*
+*.key
+*.pem

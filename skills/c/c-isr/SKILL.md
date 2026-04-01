@@ -141,7 +141,3 @@ Xil_ExceptionEnable();
 - ISR 内**禁止**调用 `xil_printf`、`sleep`、`malloc` 等阻塞/耗时函数
 - 若多个模块共用一个 GIC 实例（`g_gic_ins`），需确保全局声明后再传指针
 - 触发方式选 `rising`（0x03）适用于大多数 PL 侧脉冲信号
-
-## 参考示例
-
-完整示例见 [example/dma_isr.c](example/dma_isr.c)

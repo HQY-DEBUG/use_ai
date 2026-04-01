@@ -137,7 +137,3 @@ void CLASS_NAME::onDataReceived(const QByteArray &data) {
    - 提示：非 `QThread` 子类删除 `run()` 相关代码
    - 提示：连接信号槽时使用 `Qt::QueuedConnection` 确保线程安全
    - 提醒执行 `git commit`
-
-## 参考示例
-
-完整 Qt 类示例见 [example/udp_worker.h](example/udp_worker.h) 和 [example/udp_worker.cpp](example/udp_worker.cpp)

@@ -104,7 +104,3 @@ endmodule
 - 文件名：`<模块名>_tb.v`
 - 时钟信号命名：`clk`（主时钟）、`clk_<域名>`（多时钟域）
 - 复位信号命名：低有效 `rst_n`，高有效 `rst`
-
-## 参考示例
-
-完整示例见 [example/uart_rx_tb.v](example/uart_rx_tb.v)

@@ -112,7 +112,3 @@ void FILE_NAME_poll(void) {
 
 4. 生成文件后告知用户路径，提示按需增删函数声明
 5. 提醒用户执行 `git commit`
-
-## 参考示例
-
-完整生成示例见 [example/dma_data.c](example/dma_data.c) 和 [example/dma_data.h](example/dma_data.h)

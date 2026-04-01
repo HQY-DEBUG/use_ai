@@ -67,7 +67,3 @@ disable-model-invocation: true
 
 建议：<总体改进建议>
 ```
-
-## 参考示例
-
-审查报告示例见 [example/review_report.md](example/review_report.md)

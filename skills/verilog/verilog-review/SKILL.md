@@ -41,7 +41,7 @@ disable-model-invocation: true
 ### 命名规范
 - [ ] 模块名、信号名使用小写下划线
 - [ ] 参数（`parameter`）使用全大写下划线
-- [ ] 寄存器信号使用 `_r` 后缀
+- [ ] 延时信号使用 `_r` 后缀，多级延时用 `_r1`、`_r2` 递增
 - [ ] 复位信号：低有效命名为 `rst_n`，高有效命名为 `rst`
 
 ### 注释规范
@@ -64,7 +64,3 @@ disable-model-invocation: true
 
 建议：<总体改进建议>
 ```
-
-## 参考示例
-
-违规代码审查报告及修正对比见 [example/review_report.md](example/review_report.md)

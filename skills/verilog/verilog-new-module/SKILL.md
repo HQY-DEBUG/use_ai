@@ -67,7 +67,3 @@ endmodule
 
 4. 写入文件后，告知用户文件路径，并提示按需修改端口声明
 5. 每次创建新文件后提醒用户执行 `git commit`
-
-## 参考示例
-
-完整生成示例见 [example/uart_rx.v](example/uart_rx.v)（UART 接收模块）

@@ -215,7 +215,3 @@ void module_ringbuf_clear(ModuleRingbuf *rb) {
 - ISR 场景提醒：`push` 在 ISR 中调用时，主循环 `pop` 前需关闭对应中断或使用临界区
 - 缓冲区大小建议：UART 1024B，DMA 4096B 以上
 - 生成后提示用户确认大小是否为 2 的幂次
-
-## 参考示例
-
-完整示例见 [example/uart_rx_ringbuf.c](example/uart_rx_ringbuf.c)

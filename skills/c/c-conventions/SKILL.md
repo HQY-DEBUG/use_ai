@@ -111,7 +111,3 @@ Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
 ```
 
 修改记录仅保留最近 **3** 个版本，最新在最前。
-
-## 参考示例
-
-完整规范示例见 [example/dma_data.c](example/dma_data.c) 和 [example/dma_data.h](example/dma_data.h)
