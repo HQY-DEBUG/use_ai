@@ -2,7 +2,7 @@
 
 > 版本：v1.0　日期：2026/04/01
 
-振镜控制板工程的 AI 协作配置仓库，存放 **Claude Code** 和 **GitHub Copilot** 的使用规范与技能脚本。
+个人通用 AI 协作配置仓库，存放 **Claude Code** 和 **GitHub Copilot** 的使用规范与技能脚本。
 
 ---
 
