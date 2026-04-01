@@ -58,30 +58,30 @@ module MODULE_NAME #(
 );
 
 // ---- 内部存储 ----//
-reg [DATA_W-1:0] mem_r [0:DEPTH-1] ;
+reg [DATA_W-1:0] mem [0:DEPTH-1] ;
 
 // ---- 读写指针 ----//
-reg [ADDR_W:0] wr_ptr_r ;  // 多一位用于区分满/空
-reg [ADDR_W:0] rd_ptr_r ;
+reg [ADDR_W:0] wr_ptr ;  // 多一位用于区分满/空
+reg [ADDR_W:0] rd_ptr ;
 
 // ---- 状态标志 ----//
-assign full     = (wr_ptr_r[ADDR_W] != rd_ptr_r[ADDR_W]) &&
-                  (wr_ptr_r[ADDR_W-1:0] == rd_ptr_r[ADDR_W-1:0]) ;
-assign empty    = (wr_ptr_r == rd_ptr_r) ;
-assign data_cnt = wr_ptr_r - rd_ptr_r ;
-assign rd_data  = mem_r[rd_ptr_r[ADDR_W-1:0]] ;
+assign full     = (wr_ptr[ADDR_W] != rd_ptr[ADDR_W]) &&
+                  (wr_ptr[ADDR_W-1:0] == rd_ptr[ADDR_W-1:0]) ;
+assign empty    = (wr_ptr == rd_ptr) ;
+assign data_cnt = wr_ptr - rd_ptr ;
+assign rd_data  = mem[rd_ptr[ADDR_W-1:0]] ;
 
 // ---- 写操作 ----//
 always @(posedge clk or negedge rst_n)
   begin
     if (rst_n == 1'b0)
       begin
-        wr_ptr_r <= {(ADDR_W+1){1'b0}} ;
+        wr_ptr <= {(ADDR_W+1){1'b0}} ;
       end
     else if (wr_en && !full)
       begin
-        mem_r[wr_ptr_r[ADDR_W-1:0]] <= wr_data ;
-        wr_ptr_r                     <= wr_ptr_r + 1'b1 ;
+        mem[wr_ptr[ADDR_W-1:0]] <= wr_data ;
+        wr_ptr                   <= wr_ptr + 1'b1 ;
       end
   end
 
@@ -90,11 +90,11 @@ always @(posedge clk or negedge rst_n)
   begin
     if (rst_n == 1'b0)
       begin
-        rd_ptr_r <= {(ADDR_W+1){1'b0}} ;
+        rd_ptr <= {(ADDR_W+1){1'b0}} ;
       end
     else if (rd_en && !empty)
       begin
-        rd_ptr_r <= rd_ptr_r + 1'b1 ;
+        rd_ptr <= rd_ptr + 1'b1 ;
       end
   end
 
@@ -136,44 +136,44 @@ module MODULE_NAME #(
 );
 
 // ---- 内部存储（双口 RAM 推断）----//
-reg [DATA_W-1:0] mem_r [0:DEPTH-1] ;
+reg [DATA_W-1:0] mem [0:DEPTH-1] ;
 
 // ---- 写时钟域：二进制指针 + 格雷码 ----//
-reg [ADDR_W:0] wr_bin_r  ;
-reg [ADDR_W:0] wr_gray_r ;
-wire[ADDR_W:0] wr_bin_next  = wr_bin_r + (wr_en & ~full) ;
-wire[ADDR_W:0] wr_gray_next = (wr_bin_next >> 1) ^ wr_bin_next ;
+reg  [ADDR_W:0] wr_bin  ;
+reg  [ADDR_W:0] wr_gray ;
+wire [ADDR_W:0] wr_bin_next  = wr_bin + (wr_en & ~full) ;
+wire [ADDR_W:0] wr_gray_next = (wr_bin_next >> 1) ^ wr_bin_next ;
 
 // ---- 读时钟域：二进制指针 + 格雷码 ----//
-reg [ADDR_W:0] rd_bin_r  ;
-reg [ADDR_W:0] rd_gray_r ;
-wire[ADDR_W:0] rd_bin_next  = rd_bin_r + (rd_en & ~empty) ;
-wire[ADDR_W:0] rd_gray_next = (rd_bin_next >> 1) ^ rd_bin_next ;
+reg  [ADDR_W:0] rd_bin  ;
+reg  [ADDR_W:0] rd_gray ;
+wire [ADDR_W:0] rd_bin_next  = rd_bin + (rd_en & ~empty) ;
+wire [ADDR_W:0] rd_gray_next = (rd_bin_next >> 1) ^ rd_bin_next ;
 
-// ---- CDC：将读格雷码同步到写时钟域 ----//
-reg [ADDR_W:0] rd_gray_sync1_r ;
-reg [ADDR_W:0] rd_gray_sync2_r ;
+// ---- CDC：将读格雷码同步到写时钟域（延时信号加 _r）----//
+reg [ADDR_W:0] rd_gray_r  ;  // 同步第一拍
+reg [ADDR_W:0] rd_gray_r2 ;  // 同步第二拍
 
-// ---- CDC：将写格雷码同步到读时钟域 ----//
-reg [ADDR_W:0] wr_gray_sync1_r ;
-reg [ADDR_W:0] wr_gray_sync2_r ;
+// ---- CDC：将写格雷码同步到读时钟域（延时信号加 _r）----//
+reg [ADDR_W:0] wr_gray_r  ;  // 同步第一拍
+reg [ADDR_W:0] wr_gray_r2 ;  // 同步第二拍
 
 // ---- 写时钟域逻辑 ----//
 always @(posedge wr_clk or negedge wr_rst_n)
   begin
     if (wr_rst_n == 1'b0)
       begin
-        wr_bin_r        <= {(ADDR_W+1){1'b0}} ;
-        wr_gray_r       <= {(ADDR_W+1){1'b0}} ;
-        rd_gray_sync1_r <= {(ADDR_W+1){1'b0}} ;
-        rd_gray_sync2_r <= {(ADDR_W+1){1'b0}} ;
+        wr_bin    <= {(ADDR_W+1){1'b0}} ;
+        wr_gray   <= {(ADDR_W+1){1'b0}} ;
+        rd_gray_r <= {(ADDR_W+1){1'b0}} ;
+        rd_gray_r2 <= {(ADDR_W+1){1'b0}} ;
       end
     else
       begin
-        wr_bin_r        <= wr_bin_next ;
-        wr_gray_r       <= wr_gray_next ;
-        rd_gray_sync1_r <= rd_gray_r ;
-        rd_gray_sync2_r <= rd_gray_sync1_r ;
+        wr_bin     <= wr_bin_next ;
+        wr_gray    <= wr_gray_next ;
+        rd_gray_r  <= rd_gray ;
+        rd_gray_r2 <= rd_gray_r ;
       end
   end
 
@@ -182,17 +182,17 @@ always @(posedge rd_clk or negedge rd_rst_n)
   begin
     if (rd_rst_n == 1'b0)
       begin
-        rd_bin_r        <= {(ADDR_W+1){1'b0}} ;
-        rd_gray_r       <= {(ADDR_W+1){1'b0}} ;
-        wr_gray_sync1_r <= {(ADDR_W+1){1'b0}} ;
-        wr_gray_sync2_r <= {(ADDR_W+1){1'b0}} ;
+        rd_bin    <= {(ADDR_W+1){1'b0}} ;
+        rd_gray   <= {(ADDR_W+1){1'b0}} ;
+        wr_gray_r  <= {(ADDR_W+1){1'b0}} ;
+        wr_gray_r2 <= {(ADDR_W+1){1'b0}} ;
       end
     else
       begin
-        rd_bin_r        <= rd_bin_next ;
-        rd_gray_r       <= rd_gray_next ;
-        wr_gray_sync1_r <= wr_gray_r ;
-        wr_gray_sync2_r <= wr_gray_sync1_r ;
+        rd_bin     <= rd_bin_next ;
+        rd_gray    <= rd_gray_next ;
+        wr_gray_r  <= wr_gray ;
+        wr_gray_r2 <= wr_gray_r ;
       end
   end
 
@@ -200,14 +200,14 @@ always @(posedge rd_clk or negedge rd_rst_n)
 always @(posedge wr_clk)
   begin
     if (wr_en && !full)
-      mem_r[wr_bin_r[ADDR_W-1:0]] <= wr_data ;
+      mem[wr_bin[ADDR_W-1:0]] <= wr_data ;
   end
 
-assign rd_data = mem_r[rd_bin_r[ADDR_W-1:0]] ;
+assign rd_data = mem[rd_bin[ADDR_W-1:0]] ;
 
 // ---- 满/空判断（格雷码比较）----//
-assign full  = (wr_gray_r == {~rd_gray_sync2_r[ADDR_W:ADDR_W-1], rd_gray_sync2_r[ADDR_W-2:0]}) ;
-assign empty = (rd_gray_r == wr_gray_sync2_r) ;
+assign full  = (wr_gray == {~rd_gray_r2[ADDR_W:ADDR_W-1], rd_gray_r2[ADDR_W-2:0]}) ;
+assign empty = (rd_gray == wr_gray_r2) ;
 
 endmodule
 ```
