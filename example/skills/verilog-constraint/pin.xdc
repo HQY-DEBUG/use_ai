@@ -1,61 +1,41 @@
-# galvo_top 管脚约束
-# 目标器件：Zynq UltraScale+ XCZU3EG-SFVC784
+# top 管脚约束
+# 目标器件：通用 FPGA 开发板示例（Artix-7 / Basys3）
 # 生成时间：2026/05/26
 # 说明：所有 IO 电平须与硬件原理图核对后使用
 
 # ============================================================
 # 时钟输入
 # ============================================================
-set_property PACKAGE_PIN    H11           [get_ports sys_clk_p]
-set_property PACKAGE_PIN    G11           [get_ports sys_clk_n]
-set_property IOSTANDARD     DIFF_SSTL12   [get_ports sys_clk_p]
-set_property IOSTANDARD     DIFF_SSTL12   [get_ports sys_clk_n]
+set_property PACKAGE_PIN    E3            [get_ports clk]
+set_property IOSTANDARD     LVCMOS33      [get_ports clk]
+create_clock -period 10.000              [get_ports clk]
 
 # ============================================================
 # 复位输入（低有效，外部按钮）
 # ============================================================
-set_property PACKAGE_PIN    AE8           [get_ports rstn]
-set_property IOSTANDARD     LVCMOS18      [get_ports rstn]
-set_property PULLUP         true          [get_ports rstn]
+set_property PACKAGE_PIN    C12           [get_ports rstn]
+set_property IOSTANDARD     LVCMOS33      [get_ports rstn]
 
 # ============================================================
-# 振镜 X 轴 DAC SPI 接口
+# LED 输出
 # ============================================================
-set_property PACKAGE_PIN    AB7           [get_ports galvo_x_sclk]
-set_property PACKAGE_PIN    AB6           [get_ports galvo_x_mosi]
-set_property PACKAGE_PIN    AC8           [get_ports galvo_x_csn]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_x_sclk]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_x_mosi]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_x_csn]
-set_property SLEW           FAST          [get_ports galvo_x_sclk]
-set_property SLEW           FAST          [get_ports galvo_x_mosi]
-set_property SLEW           FAST          [get_ports galvo_x_csn]
+set_property PACKAGE_PIN    H17           [get_ports {led[0]}]
+set_property PACKAGE_PIN    K15           [get_ports {led[1]}]
+set_property PACKAGE_PIN    J13           [get_ports {led[2]}]
+set_property PACKAGE_PIN    N14           [get_ports {led[3]}]
+set_property IOSTANDARD     LVCMOS33      [get_ports {led[*]}]
 
 # ============================================================
-# 振镜 Y 轴 DAC SPI 接口
+# 按键输入
 # ============================================================
-set_property PACKAGE_PIN    AD7           [get_ports galvo_y_sclk]
-set_property PACKAGE_PIN    AD6           [get_ports galvo_y_mosi]
-set_property PACKAGE_PIN    AE7           [get_ports galvo_y_csn]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_y_sclk]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_y_mosi]
-set_property IOSTANDARD     LVCMOS18      [get_ports galvo_y_csn]
-set_property SLEW           FAST          [get_ports galvo_y_sclk]
-set_property SLEW           FAST          [get_ports galvo_y_mosi]
-set_property SLEW           FAST          [get_ports galvo_y_csn]
+set_property PACKAGE_PIN    J15           [get_ports {btn[0]}]
+set_property PACKAGE_PIN    L16           [get_ports {btn[1]}]
+set_property IOSTANDARD     LVCMOS33      [get_ports {btn[*]}]
 
 # ============================================================
-# 激光使能输出
+# UART
 # ============================================================
-set_property PACKAGE_PIN    W8            [get_ports laser_en]
-set_property IOSTANDARD     LVCMOS18      [get_ports laser_en]
-set_property SLEW           SLOW          [get_ports laser_en]
-
-# ============================================================
-# 状态 LED
-# ============================================================
-set_property PACKAGE_PIN    P8            [get_ports led[0]]
-set_property PACKAGE_PIN    P9            [get_ports led[1]]
-set_property PACKAGE_PIN    R8            [get_ports led[2]]
-set_property PACKAGE_PIN    R9            [get_ports led[3]]
-set_property IOSTANDARD     LVCMOS18      [get_ports {led[*]}]
+set_property PACKAGE_PIN    D10           [get_ports uart_tx]
+set_property PACKAGE_PIN    A9            [get_ports uart_rx]
+set_property IOSTANDARD     LVCMOS33      [get_ports uart_tx]
+set_property IOSTANDARD     LVCMOS33      [get_ports uart_rx]

@@ -1,4 +1,4 @@
-# CLAUDE.md — 振镜控制板 AI 协作规范
+# CLAUDE.md — 个人通用 AI 协作规范
 
 > 本文件为项目级规范，通用规则通过下方引入。
 
@@ -8,7 +8,7 @@
 
 ## 项目结构概览
 
-本仓库（`use_ai`）为 AI 协作配置仓库，存放振镜控制板工程的 AI 使用规范与技能脚本：
+本仓库（`use_ai`）为个人通用 AI 协作配置仓库，存放 Claude Code 与 GitHub Copilot 的使用规范与技能脚本：
 
 | 目录 / 文件              | 用途                                         |
 |------------------------|---------------------------------------------|
@@ -17,8 +17,6 @@
 | `.github/skills/`      | Copilot 技能脚本（平铺，由 VS Code Copilot 加载）   |
 | `skills/`              | 技能脚本按语言分类存档（与 `.github/skills/` 内容一致） |
 | `README.md`            | 仓库说明                                      |
-
-> 振镜控制板工程（Zynq FPGA）的实际代码位于独立的工程仓库。
 
 ---
 
@@ -88,23 +86,3 @@
 | `/verilog-timing <文件> [目标频率]` | 时序风险分析，生成 XDC 约束建议 |
 | `/verilog-constraint <文件> [主时钟MHz]` | 生成 Vivado XDC 时序约束文件（pin.xdc + time.xdc） |
 | `/verilog-conventions` | 加载 Verilog 规范背景知识（自动触发） |
-
----
-
-## Git 范围（本项目）
-
-本项目 `<范围>` 取值：
-
-`PC`、`qt`、`vitis`、`dma`、`uart`、`ui`、`doc`、`verilog`、`matlab`
-
----
-
-## 架构要点
-
-**PS 端（Vitis）**：init + poll 模式；Log 四级分层（`prinfo`/`prwarn`/`prerror` 常开，`prbrief` 默认开，`prdebug`/`prlist`/`prhigh` 默认关）
-
-**协议命令**：`CmdType = 0xAABBCCDD`（AA=执行类型，BB=大类，CC=子命令，DD=应答类型）
-
-**DDR 布局**：代码区 → PROG(32MB) → CORR(8MB) → JUMP(4KB) → DMA_X/Y/Z(各10MB) → LIST(16MB)
-
-**PL 端（Verilog）**：时序用 `<=`，组合用 `=`；复位统一命名（低有效 `rstn`，高有效 `rst`）
