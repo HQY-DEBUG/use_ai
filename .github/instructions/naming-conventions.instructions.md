@@ -47,4 +47,4 @@ applyTo: "**/*.c,**/*.h,**/*.cpp,**/*.hpp,**/*.py,**/*.m,**/*.v,**/*.sv,**/*.vh,
 ## 通用原则
 
 - 命名要有意义，避免单字母（除循环变量 `i`、`j`、`k`）
-- 布尔变量用 `is_`、`has_`、`can_` 等前缀，如 `is_valid`、`has_data`
+- 布尔变量用 `is_`、`has_`、`can_` 等前缀，如 `is_valid`、`has_data`（仅适用于 C/C++/Python/Qt，Verilog 不使用）
