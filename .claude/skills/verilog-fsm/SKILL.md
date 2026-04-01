@@ -50,7 +50,7 @@ localparam [1:0] DONE  = 2'd2 ;
 localparam [1:0] ERROR = 2'd3 ;
 
 // ---- 状态寄存器声明 ----//
-reg [1:0] state_r      ;  // 当前状态
+reg [1:0] state      ;  // 当前状态
 reg [1:0] state_next   ;  // 下一状态
 
 // ---- 状态寄存器（时序逻辑）----//
@@ -58,19 +58,19 @@ always @(posedge clk or negedge rst_n)
   begin
     if (rst_n == 1'b0)
       begin
-        state_r <= IDLE ;
+        state <= IDLE ;
       end
     else
       begin
-        state_r <= state_next ;
+        state <= state_next ;
       end
   end
 
 // ---- 次态逻辑（组合逻辑）----//
 always @(*)
   begin
-    state_next = state_r ;  // 默认保持当前状态
-    case (state_r)
+    state_next = state ;  // 默认保持当前状态
+    case (state)
       IDLE :
         begin
           if (i_xxx == 1'b1)
@@ -96,7 +96,7 @@ always @(*)
   end
 
 // ---- 输出逻辑（组合逻辑）----//
-assign o_xxx = (state_r == DONE) ? 1'b1 : 1'b0 ;
+assign o_xxx = (state == DONE) ? 1'b1 : 1'b0 ;
 
 endmodule
 ```
