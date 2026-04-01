@@ -37,30 +37,30 @@ module data_fifo #(
 localparam ADDR_WIDTH = $clog2(DEPTH) ;  // 地址位宽
 
 // ---- 内部信号 ----
-reg  [DATA_WIDTH-1:0] mem [0:DEPTH-1] ;  // 存储阵列
-reg  [ADDR_WIDTH:0]   wr_ptr_r        ;  // 写指针（多一位用于满/空判断）
-reg  [ADDR_WIDTH:0]   rd_ptr_r        ;  // 读指针
+reg  [DATA_WIDTH-1:0] mem    [0:DEPTH-1] ;  // 存储阵列
+reg  [ADDR_WIDTH:0]   wr_ptr             ;  // 写指针（多一位用于满/空判断）
+reg  [ADDR_WIDTH:0]   rd_ptr             ;  // 读指针
 
 // ---- 满/空判断 ----
 // 写指针超过读指针 DEPTH 个位置时满；相等时空
-assign full       = ((wr_ptr_r[ADDR_WIDTH] != rd_ptr_r[ADDR_WIDTH]) &&
-                     (wr_ptr_r[ADDR_WIDTH-1:0] == rd_ptr_r[ADDR_WIDTH-1:0]));
-assign empty      = (wr_ptr_r == rd_ptr_r);
-assign data_count = wr_ptr_r - rd_ptr_r;
+assign full       = ((wr_ptr[ADDR_WIDTH] != rd_ptr[ADDR_WIDTH]) &&
+                     (wr_ptr[ADDR_WIDTH-1:0] == rd_ptr[ADDR_WIDTH-1:0]));
+assign empty      = (wr_ptr == rd_ptr);
+assign data_count = wr_ptr - rd_ptr;
 
 // ---- 写操作 ----
 always @(posedge clk)
   begin
     if (rstn == 1'b0)
       begin
-        wr_ptr_r <= {(ADDR_WIDTH+1){1'b0}};
+        wr_ptr <= {(ADDR_WIDTH+1){1'b0}};
       end
     else
       begin
         if (wr_en == 1'b1 && full == 1'b0)
           begin
-            mem[wr_ptr_r[ADDR_WIDTH-1:0]] <= wr_data;
-            wr_ptr_r                       <= wr_ptr_r + 1'b1;
+            mem[wr_ptr[ADDR_WIDTH-1:0]] <= wr_data;
+            wr_ptr                       <= wr_ptr + 1'b1;
           end
       end
   end
@@ -70,18 +70,18 @@ always @(posedge clk)
   begin
     if (rstn == 1'b0)
       begin
-        rd_ptr_r <= {(ADDR_WIDTH+1){1'b0}};
+        rd_ptr <= {(ADDR_WIDTH+1){1'b0}};
       end
     else
       begin
         if (rd_en == 1'b1 && empty == 1'b0)
           begin
-            rd_ptr_r <= rd_ptr_r + 1'b1;
+            rd_ptr <= rd_ptr + 1'b1;
           end
       end
   end
 
 // ---- 同步读出（读使能后下一拍数据有效）----
-assign rd_data = mem[rd_ptr_r[ADDR_WIDTH-1:0]];
+assign rd_data = mem[rd_ptr[ADDR_WIDTH-1:0]];
 
 endmodule
