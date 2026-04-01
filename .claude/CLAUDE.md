@@ -2,7 +2,7 @@
 
 > 本文件为项目级规范，通用规则通过下方引入。
 
-@rule/rule.md
+@../rule/rule.md
 
 ---
 
@@ -10,13 +10,13 @@
 
 本仓库（`use_ai`）为 AI 协作配置仓库，存放振镜控制板工程的 AI 使用规范与技能脚本：
 
-| 目录 / 文件         | 用途                                      |
-|-------------------|------------------------------------------|
-| `rule/`           | 通用 AI 协作规则（`rule.md`）及各语言 Copilot 规范  |
-| `.claude/skills/` | Claude Code 技能脚本（平铺，由 Claude Code 加载）  |
-| `skills/`         | 技能脚本按语言分类存档（与 `.claude/skills/` 内容一致） |
-| `CLAUDE.md`       | 项目级行为规范（本文件）                          |
-| `README.md`       | 仓库说明                                   |
+| 目录 / 文件              | 用途                                         |
+|------------------------|---------------------------------------------|
+| `rule/`                | 通用 AI 协作规则（`rule.md`）及各语言 Copilot 规范   |
+| `.claude/CLAUDE.md`    | 项目级行为规范（本文件）                             |
+| `.github/skills/`      | Copilot 技能脚本（平铺，由 VS Code Copilot 加载）   |
+| `skills/`              | 技能脚本按语言分类存档（与 `.github/skills/` 内容一致） |
+| `README.md`            | 仓库说明                                      |
 
 > 振镜控制板工程（Zynq FPGA）的实际代码位于独立的工程仓库。
 
@@ -86,7 +86,7 @@
 | `/verilog-lint <文件>` | RTL 质量审查（与工具无关） |
 | `/verilog-resource <文件>` | 估算 LUT/FF/BRAM/DSP 资源用量 |
 | `/verilog-timing <文件> [目标频率]` | 时序风险分析，生成 XDC 约束建议 |
-| `/verilog-constraint <文件> [主时钟MHz]` | 生成 Vivado XDC 时序约束文件 |
+| `/verilog-constraint <文件> [主时钟MHz]` | 生成 Vivado XDC 时序约束文件（pin.xdc + time.xdc） |
 | `/verilog-conventions` | 加载 Verilog 规范背景知识（自动触发） |
 
 ---
