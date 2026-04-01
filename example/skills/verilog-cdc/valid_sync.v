@@ -22,19 +22,19 @@ module valid_sync (
 );
 
 // ---- 源域：将脉冲展宽为电平（Toggle FF）----
-reg  src_toggle_r  ;  // 源域翻转寄存器
+reg  src_toggle  ;  // 源域翻转寄存器
 
 always @(posedge src_clk or negedge src_rstn)
   begin
     if (src_rstn == 1'b0)
       begin
-        src_toggle_r <= 1'b0;
+        src_toggle <= 1'b0;
       end
     else
       begin
         if (src_valid == 1'b1)
           begin
-            src_toggle_r <= ~src_toggle_r;  // 每次有效脉冲翻转一次
+            src_toggle <= ~src_toggle;  // 每次有效脉冲翻转一次
           end
       end
   end
@@ -54,7 +54,7 @@ always @(posedge dst_clk or negedge dst_rstn)
       end
     else
       begin
-        sync_r1 <= src_toggle_r;
+        sync_r1 <= src_toggle;
         sync_r2 <= sync_r1;
         sync_r3 <= sync_r2;
       end

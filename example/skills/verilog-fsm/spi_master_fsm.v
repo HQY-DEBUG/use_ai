@@ -35,47 +35,47 @@ localparam ST_DATA  = 2'd2 ;  // 逐位发送/接收 DATA_LEN 位
 localparam ST_STOP  = 2'd3 ;  // 最后一位后拉高 CS
 
 // ---- 内部寄存器 ----
-reg  [1:0]              state_r     ;  // 当前状态
-reg  [$clog2(DATA_LEN):0] bit_cnt_r ;  // 已传输位计数
-reg  [$clog2(CLK_DIV):0]  div_cnt_r ;  // 分频计数器
-reg  [15:0]             shift_tx_r  ;  // 发送移位寄存器
-reg  [15:0]             shift_rx_r  ;  // 接收移位寄存器
-reg                     sck_en_r    ;  // SCK 使能
+reg  [1:0]              state     ;  // 当前状态
+reg  [$clog2(DATA_LEN):0] bit_cnt ;  // 已传输位计数
+reg  [$clog2(CLK_DIV):0]  div_cnt ;  // 分频计数器
+reg  [15:0]             shift_tx  ;  // 发送移位寄存器
+reg  [15:0]             shift_rx  ;  // 接收移位寄存器
+reg                     sck_en    ;  // SCK 使能
 
-assign busy = (state_r != ST_IDLE) ? 1'b1 : 1'b0;
+assign busy = (state != ST_IDLE) ? 1'b1 : 1'b0;
 
 // ---- 状态机主体 ----
 always @(posedge clk or negedge rstn)
   begin
     if (rstn == 1'b0)
       begin
-        state_r    <= ST_IDLE;
-        bit_cnt_r  <= {($clog2(DATA_LEN)+1){1'b0}};
-        div_cnt_r  <= {($clog2(CLK_DIV)+1){1'b0}};
-        shift_tx_r <= 16'd0;
-        shift_rx_r <= 16'd0;
+        state    <= ST_IDLE;
+        bit_cnt  <= {($clog2(DATA_LEN)+1){1'b0}};
+        div_cnt  <= {($clog2(CLK_DIV)+1){1'b0}};
+        shift_tx <= 16'd0;
+        shift_rx <= 16'd0;
         rx_data    <= 16'd0;
         spi_csn    <= 1'b1;
         spi_sck    <= 1'b0;
         spi_mosi   <= 1'b0;
-        sck_en_r   <= 1'b0;
+        sck_en   <= 1'b0;
       end
     else
       begin
-        case (state_r)
+        case (state)
           // ---- IDLE：等待 start 触发 ----
           ST_IDLE :
             begin
               spi_csn   <= 1'b1;
               spi_sck   <= 1'b0;
               spi_mosi  <= 1'b0;
-              sck_en_r  <= 1'b0;
+              sck_en  <= 1'b0;
               if (start == 1'b1)
                 begin
-                  shift_tx_r <= tx_data;
-                  bit_cnt_r  <= {($clog2(DATA_LEN)+1){1'b0}};
-                  div_cnt_r  <= {($clog2(CLK_DIV)+1){1'b0}};
-                  state_r    <= ST_START;
+                  shift_tx <= tx_data;
+                  bit_cnt  <= {($clog2(DATA_LEN)+1){1'b0}};
+                  div_cnt  <= {($clog2(CLK_DIV)+1){1'b0}};
+                  state    <= ST_START;
                 end
             end
 
@@ -83,46 +83,46 @@ always @(posedge clk or negedge rstn)
           ST_START :
             begin
               spi_csn <= 1'b0;
-              if (div_cnt_r == CLK_DIV - 1)
+              if (div_cnt == CLK_DIV - 1)
                 begin
-                  div_cnt_r  <= {($clog2(CLK_DIV)+1){1'b0}};
-                  spi_mosi   <= shift_tx_r[DATA_LEN-1];  // 最高位先出
-                  state_r    <= ST_DATA;
+                  div_cnt  <= {($clog2(CLK_DIV)+1){1'b0}};
+                  spi_mosi   <= shift_tx[DATA_LEN-1];  // 最高位先出
+                  state    <= ST_DATA;
                 end
               else
                 begin
-                  div_cnt_r <= div_cnt_r + 1'b1;
+                  div_cnt <= div_cnt + 1'b1;
                 end
             end
 
           // ---- DATA：以 SCK 节拍逐位移出/移入 ----
           ST_DATA :
             begin
-              if (div_cnt_r == CLK_DIV/2 - 1)
+              if (div_cnt == CLK_DIV/2 - 1)
                 begin
                   spi_sck   <= 1'b1;  // SCK 上升沿：从机采样 MOSI
-                  shift_rx_r <= {shift_rx_r[14:0], spi_miso};  // 采样 MISO
-                  div_cnt_r  <= div_cnt_r + 1'b1;
+                  shift_rx <= {shift_rx[14:0], spi_miso};  // 采样 MISO
+                  div_cnt  <= div_cnt + 1'b1;
                 end
-              else if (div_cnt_r == CLK_DIV - 1)
+              else if (div_cnt == CLK_DIV - 1)
                 begin
                   spi_sck   <= 1'b0;  // SCK 下降沿：更新 MOSI
-                  div_cnt_r <= {($clog2(CLK_DIV)+1){1'b0}};
-                  if (bit_cnt_r == DATA_LEN - 1)
+                  div_cnt <= {($clog2(CLK_DIV)+1){1'b0}};
+                  if (bit_cnt == DATA_LEN - 1)
                     begin
-                      rx_data <= shift_rx_r;
-                      state_r <= ST_STOP;
+                      rx_data <= shift_rx;
+                      state <= ST_STOP;
                     end
                   else
                     begin
-                      bit_cnt_r  <= bit_cnt_r + 1'b1;
-                      shift_tx_r <= {shift_tx_r[14:0], 1'b0};  // 左移
-                      spi_mosi   <= shift_tx_r[DATA_LEN-2];
+                      bit_cnt  <= bit_cnt + 1'b1;
+                      shift_tx <= {shift_tx[14:0], 1'b0};  // 左移
+                      spi_mosi   <= shift_tx[DATA_LEN-2];
                     end
                 end
               else
                 begin
-                  div_cnt_r <= div_cnt_r + 1'b1;
+                  div_cnt <= div_cnt + 1'b1;
                 end
             end
 
@@ -132,12 +132,12 @@ always @(posedge clk or negedge rstn)
               spi_csn  <= 1'b1;
               spi_sck  <= 1'b0;
               spi_mosi <= 1'b0;
-              state_r  <= ST_IDLE;
+              state  <= ST_IDLE;
             end
 
           default :
             begin
-              state_r <= ST_IDLE;
+              state <= ST_IDLE;
             end
         endcase
       end

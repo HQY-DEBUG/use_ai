@@ -43,14 +43,14 @@ localparam ADDR_WIDTH = $clog2(DEPTH) ;
 
 // ---- 内部存储（含 tlast 随路存储）----
 reg  [DATA_WIDTH:0] mem [0:DEPTH-1] ;  // [DATA_WIDTH] 存 tlast，[DATA_WIDTH-1:0] 存 tdata
-reg  [ADDR_WIDTH:0] wr_ptr_r        ;  // 写指针
-reg  [ADDR_WIDTH:0] rd_ptr_r        ;  // 读指针
+reg  [ADDR_WIDTH:0] wr_ptr        ;  // 写指针
+reg  [ADDR_WIDTH:0] rd_ptr        ;  // 读指针
 
 // ---- 满/空逻辑 ----
-assign full       = ((wr_ptr_r[ADDR_WIDTH] != rd_ptr_r[ADDR_WIDTH]) &&
-                     (wr_ptr_r[ADDR_WIDTH-1:0] == rd_ptr_r[ADDR_WIDTH-1:0]));
-assign empty      = (wr_ptr_r == rd_ptr_r);
-assign fifo_count = wr_ptr_r - rd_ptr_r;
+assign full       = ((wr_ptr[ADDR_WIDTH] != rd_ptr[ADDR_WIDTH]) &&
+                     (wr_ptr[ADDR_WIDTH-1:0] == rd_ptr[ADDR_WIDTH-1:0]));
+assign empty      = (wr_ptr == rd_ptr);
+assign fifo_count = wr_ptr - rd_ptr;
 assign prog_full  = (fifo_count >= PROG_FULL) ? 1'b1 : 1'b0;
 
 // ---- AXI-Stream 流控 ----
@@ -65,12 +65,12 @@ always @(posedge clk)
   begin
     if (rstn == 1'b0)
       begin
-        wr_ptr_r <= {(ADDR_WIDTH+1){1'b0}};
+        wr_ptr <= {(ADDR_WIDTH+1){1'b0}};
       end
     else if (wr_fire == 1'b1)
       begin
-        mem[wr_ptr_r[ADDR_WIDTH-1:0]] <= {s_axis_tlast, s_axis_tdata};
-        wr_ptr_r                       <= wr_ptr_r + 1'b1;
+        mem[wr_ptr[ADDR_WIDTH-1:0]] <= {s_axis_tlast, s_axis_tdata};
+        wr_ptr                       <= wr_ptr + 1'b1;
       end
   end
 
@@ -79,16 +79,16 @@ always @(posedge clk)
   begin
     if (rstn == 1'b0)
       begin
-        rd_ptr_r <= {(ADDR_WIDTH+1){1'b0}};
+        rd_ptr <= {(ADDR_WIDTH+1){1'b0}};
       end
     else if (rd_fire == 1'b1)
       begin
-        rd_ptr_r <= rd_ptr_r + 1'b1;
+        rd_ptr <= rd_ptr + 1'b1;
       end
   end
 
 // ---- 读数据输出 ----
-assign m_axis_tdata = mem[rd_ptr_r[ADDR_WIDTH-1:0]][DATA_WIDTH-1:0];
-assign m_axis_tlast = mem[rd_ptr_r[ADDR_WIDTH-1:0]][DATA_WIDTH];
+assign m_axis_tdata = mem[rd_ptr[ADDR_WIDTH-1:0]][DATA_WIDTH-1:0];
+assign m_axis_tlast = mem[rd_ptr[ADDR_WIDTH-1:0]][DATA_WIDTH];
 
 endmodule

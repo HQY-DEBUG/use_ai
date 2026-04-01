@@ -63,12 +63,12 @@ localparam ADDR_FREQ   = 4'h8 ;
 localparam ADDR_PHASE  = 4'hC ;
 
 // ---- 寄存器存储 ----
-reg [31:0] reg_ctrl_r  ;
-reg [31:0] reg_freq_r  ;
-reg [31:0] reg_phase_r ;
+reg [31:0] reg_ctrl  ;
+reg [31:0] reg_freq  ;
+reg [31:0] reg_phase ;
 
 // ---- 写地址锁存 ----
-reg [ADDR_WIDTH-1:0] aw_addr_latch_r ;
+reg [ADDR_WIDTH-1:0] aw_addr_latch ;
 
 // ---- 写通道 ----
 always @(posedge s_axi_aclk or negedge s_axi_aresetn)
@@ -76,14 +76,14 @@ always @(posedge s_axi_aclk or negedge s_axi_aresetn)
     if (s_axi_aresetn == 1'b0)
       begin
         s_axi_awready  <= 1'b0;
-        aw_addr_latch_r <= {ADDR_WIDTH{1'b0}};
+        aw_addr_latch <= {ADDR_WIDTH{1'b0}};
       end
     else
       begin
         if (s_axi_awvalid == 1'b1 && s_axi_awready == 1'b0)
           begin
             s_axi_awready   <= 1'b1;
-            aw_addr_latch_r <= s_axi_awaddr;
+            aw_addr_latch <= s_axi_awaddr;
           end
         else
           begin
@@ -116,17 +116,17 @@ always @(posedge s_axi_aclk or negedge s_axi_aresetn)
   begin
     if (s_axi_aresetn == 1'b0)
       begin
-        reg_ctrl_r  <= 32'd0;
-        reg_freq_r  <= 32'd1000;  // 默认 1000 Hz
-        reg_phase_r <= 32'd0;
+        reg_ctrl  <= 32'd0;
+        reg_freq  <= 32'd1000;  // 默认 1000 Hz
+        reg_phase <= 32'd0;
       end
     else if (s_axi_awready == 1'b1 && s_axi_awvalid == 1'b1 &&
              s_axi_wready  == 1'b1 && s_axi_wvalid  == 1'b1)
       begin
-        case (aw_addr_latch_r[3:0])
-          ADDR_CTRL  : reg_ctrl_r  <= s_axi_wdata;
-          ADDR_FREQ  : reg_freq_r  <= s_axi_wdata;
-          ADDR_PHASE : reg_phase_r <= s_axi_wdata;
+        case (aw_addr_latch[3:0])
+          ADDR_CTRL  : reg_ctrl  <= s_axi_wdata;
+          ADDR_FREQ  : reg_freq  <= s_axi_wdata;
+          ADDR_PHASE : reg_phase <= s_axi_wdata;
           default    : ;  // STATUS 寄存器只读，忽略写操作
         endcase
       end
@@ -192,10 +192,10 @@ always @(posedge s_axi_aclk or negedge s_axi_aresetn)
             s_axi_rvalid <= 1'b1;
             s_axi_rresp  <= 2'b00;
             case (s_axi_araddr[3:0])
-              ADDR_CTRL   : s_axi_rdata <= reg_ctrl_r ;
+              ADDR_CTRL   : s_axi_rdata <= reg_ctrl ;
               ADDR_STATUS : s_axi_rdata <= status_in  ;
-              ADDR_FREQ   : s_axi_rdata <= reg_freq_r ;
-              ADDR_PHASE  : s_axi_rdata <= reg_phase_r;
+              ADDR_FREQ   : s_axi_rdata <= reg_freq ;
+              ADDR_PHASE  : s_axi_rdata <= reg_phase;
               default     : s_axi_rdata <= 32'h0;
             endcase
           end
@@ -207,9 +207,9 @@ always @(posedge s_axi_aclk or negedge s_axi_aresetn)
   end
 
 // ---- 输出赋值 ----
-assign ctrl_enable = reg_ctrl_r[0] ;
-assign ctrl_srst   = reg_ctrl_r[1] ;
-assign freq_cfg    = reg_freq_r    ;
-assign phase_cfg   = reg_phase_r   ;
+assign ctrl_enable = reg_ctrl[0] ;
+assign ctrl_srst   = reg_ctrl[1] ;
+assign freq_cfg    = reg_freq    ;
+assign phase_cfg   = reg_phase   ;
 
 endmodule
