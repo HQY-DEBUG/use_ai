@@ -1,6 +1,6 @@
 ---
 name: verilog-constraint
-description: 读取 Verilog 文件，生成 Vivado XDC 时序约束文件。用法：/verilog-constraint <文件路径> [主时钟频率MHz]
+description: 读取 Verilog 文件，生成 Vivado XDC 约束文件（pin.xdc 引脚约束 + time.xdc 时序约束）。用法：/verilog-constraint <文件路径> [主时钟频率MHz]
 argument-hint: <文件路径> [主时钟频率，默认200]
 allowed-tools: [Read, Glob, Grep, Write]
 disable-model-invocation: true
@@ -17,19 +17,38 @@ disable-model-invocation: true
    - 所有时钟端口（含 `clk`、`aclk`、`wr_clk`、`rd_clk` 等命名的 `input wire`）
    - 所有跨时钟域信号（不同前缀的时钟驱动的寄存器间传递）
    - 所有外部 IO 端口（非时钟/复位的 input/output）
-3. 生成约束文件 `<模块名>.xdc`，包含以下内容：
-   - 时钟定义（`create_clock` / `create_generated_clock`）
-   - IO 延迟约束（`set_input_delay` / `set_output_delay`，默认 2 ns）
-   - CDC 伪路径（`set_false_path`）
-   - 多周期路径（若检测到明显慢路径标注 `set_multicycle_path`）
+3. 生成两个约束文件，放在与源文件相同目录：
+   - **`pin.xdc`**：引脚绑定约束（IO 物理引脚、电平标准）
+   - **`time.xdc`**：时序约束（时钟定义、IO 延迟、CDC 伪路径、多周期路径）
 4. **不修改源文件，不执行 git 提交**
 
-## 生成模板
+## pin.xdc 模板
 
 ```xdc
 ## ===========================================================
-## XDC 约束文件：<模块名>.xdc
-## 目标器件：Zynq（按需修改 PACKAGE_PIN）
+## 引脚约束：pin.xdc
+## 目标器件：Zynq（按需修改 PACKAGE_PIN 和 IOSTANDARD）
+## 生成日期：TODAY
+## ===========================================================
+
+## ---- 时钟引脚 ----
+## set_property PACKAGE_PIN <引脚号> [get_ports clk]
+## set_property IOSTANDARD  LVCMOS33  [get_ports clk]
+
+## ---- 输入引脚 ----
+## set_property PACKAGE_PIN <引脚号> [get_ports {<端口名>}]
+## set_property IOSTANDARD  LVCMOS33  [get_ports {<端口名>}]
+
+## ---- 输出引脚 ----
+## set_property PACKAGE_PIN <引脚号> [get_ports {<端口名>}]
+## set_property IOSTANDARD  LVCMOS33  [get_ports {<端口名>}]
+```
+
+## time.xdc 模板
+
+```xdc
+## ===========================================================
+## 时序约束：time.xdc
 ## 生成日期：TODAY
 ## ===========================================================
 
@@ -52,11 +71,16 @@ set_output_delay -clock clk -min 0.5 [get_ports {<输出端口列表>}]
 
 ## ---- 复位伪路径 ----
 ## set_false_path -from [get_ports rst_n]
+
+## ---- 多周期路径 ----
+## set_multicycle_path 2 -setup -from [get_cells <慢路径寄存器>]
 ```
 
 ## 输出说明
 
 生成文件后告知用户：
-- 文件路径
-- 检测到的时钟数量
-- 需要手动确认的项目（CDC 路径、IO 物理引脚绑定）
+- 生成的文件路径（`pin.xdc` 和 `time.xdc`）
+- 检测到的时钟数量及名称
+- 需要手动填写的项目：`pin.xdc` 中的物理引脚号和电平标准
+- 需要手动确认的项目：CDC 路径、多周期路径
+
