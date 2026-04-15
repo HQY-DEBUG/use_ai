@@ -306,7 +306,7 @@ INSERT INTO conductor_tasks (id, title, file_path, action, depends_on) VALUES
 评估计划是否满足**任一高风险条件**：
 - 包含删除文件/目录操作
 - 包含 `git reset --hard` / `git push --force` / `git rebase`
-- 包含覆盖现有非空文件（无 Git 备份）
+- 包含覆盖**未被 Git 追踪**的文件（无法通过 Git 恢复）
 - 用户意图描述存在仍未消除的歧义
 
 **若无高风险条件** → **直接跳过审批，进入阶段 4 自动执行**。在对话中输出：
@@ -381,17 +381,14 @@ choices: [`✅ 确认执行`, `❌ 跳过此步骤`]
 
 ### 4.3 原子化提交
 
-每完成一个通过校验的原子任务后，自动执行 Git Commit：
+**时机：每个步骤在 4.4 校验通过后立即执行提交**（不是每写完就提交，而是校验绿灯后提交）：
 
 ```bash
 git add <变更文件>
 git commit -m "<类型>(<范围>): <对应步骤的中文描述>"
 ```
 
-在 plan.md 对应步骤中记录 Commit Hash：
-```
-- [x] 步骤 2：完成（commit: a1b2c3d）
-```
+将 Commit Hash 回填到 plan.md 对应步骤，并更新 SQL `commit_hash` 字段。
 
 ### 4.4 执行后校验闭环
 
@@ -406,7 +403,7 @@ git commit -m "<类型>(<范围>): <对应步骤的中文描述>"
 | C/C++ 构建 | `CMakeLists.txt` 存在 | `cmake --build build/` |
 | Verilog 仿真 | `_tb.v` 存在 | `iverilog && vvp` |
 
-- 校验**通过** → 标记步骤完成，执行原子提交，更新 SQL `status = 'done'`。
+- 校验**通过** → 标记步骤完成，执行 **4.3 原子化提交**，更新 SQL `status = 'done'`。
 - 校验**失败** → 尝试自动修复（最多 2 次），修复后重新校验：
   - 修复成功 → 继续。
   - 修复失败 → SQL `status = 'failed'`，在 plan.md 标记 ❌，记录诊断日志，解耦依赖任务（SQL 中 depends_on 含此步骤的后续任务标记 `skipped`），继续推进无关联后续任务（熔断降级）。
@@ -452,11 +449,13 @@ choices: [`[y] 自动写入规则文件`, `[r] 仅记录到 workspace-rules.md`,
 
 ### 5.2 执行摘要生成
 
-从 SQL 汇总最终状态：
+**复杂任务**：从 SQL 汇总最终状态：
 
 ```sql
 SELECT status, COUNT(*) as cnt FROM conductor_tasks GROUP BY status;
 ```
+
+**简单任务（快速路径）**：无 SQL 表，直接从执行过程输出简短摘要。
 
 在对话中输出摘要：
 
@@ -560,8 +559,8 @@ glob(".github/skills/*/SKILL.md") + glob("skills/*/SKILL.md")
 | `/conductor <需求>` | 完整流程（阶段0→5） |
 | 任意用户输入 | 若 copilot-instructions 启用 Conductor，自动触发阶段0→1 |
 | 用户选择"确认执行" | 触发阶段3审批通过，进入阶段4 |
-| 用户选择"取消" | 终止当前计划，SQL `status` 全部置 `skipped`，结束 |
-| 用户选择"y"（规则沉淀） | 修改规则文件并更新 memory.md |
+| 用户选择"取消" | 终止当前计划；复杂任务时 SQL `status` 全部置 `skipped`；简单任务直接终止，结束 |
+| 用户选择"y"（规则沉淀） | 修改规则文件，追加到 workspace-rules.md 用户习惯记录，同步更新 memory.md |
 | 用户回复"一键回滚" | 执行 `git reset --hard <上一个安全 commit hash>` |
 
 ---
@@ -576,4 +575,4 @@ glob(".github/skills/*/SKILL.md") + glob("skills/*/SKILL.md")
 | 单文件小改、无跨模块依赖 | 可用快速路径 | ✅ 更轻量 |
 | 快速原型、临时脚本 | ❌ 过重 | ✅ |
 
-> `conductor` 的快速路径（阶段 1.4 判定为简单任务时）行为上接近 `parse`，区别在于 conductor 仍会记录 memory.md 和 SQL 状态。
+> `conductor` 的快速路径（阶段 1.4 判定为简单任务时）行为上接近 `parse`，区别在于 conductor 仍会更新 memory.md 和 workspace-rules.md，但跳过 SQL 任务表。
