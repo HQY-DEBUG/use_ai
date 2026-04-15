@@ -146,13 +146,31 @@ choices: [`✅ 先补完收尾`, `⏭️ 跳过，直接处理新请求`]
 
 选择"补完收尾" → 跳转执行阶段 5（使用上次任务上下文），完成后再处理新请求。
 
-### 0.4 上下文窗口状态评估
+### 0.4 上下文窗口状态评估与 RAG 检索
 
-- 估算当前对话 Token 量。
-- 若预计超过模型上下文上限的 70%，执行**摘要压缩**：
-  1. 提取关键决策、任务状态、文件变更清单。
-  2. 将摘要写入 `.conductor/session_summary.md`。
-  3. 后续引用此摘要替代完整历史。
+**Token 量评估**：估算当前对话轮次与已读文件总量。  
+若预计超过模型上下文上限的 **70%**，执行**摘要压缩**：
+
+1. 提取关键决策、当前任务状态、已完成步骤、文件变更清单。
+2. 使用 `create` 工具将摘要写入 `.conductor/session_summary.md`（使用 `templates/session_summary.md` 格式，替换所有 `{{占位符}}`）。
+3. 后续对话**仅引用 session_summary.md**，不再重复读取完整历史文件。
+4. 输出提示：
+   ```
+   📦 上下文已压缩 → .conductor/session_summary.md（保留关键状态，历史已归档）
+   ```
+
+**RAG 精准检索（Token 超限时的代码引用策略）**：
+
+压缩后若需引用代码片段，**禁止全量读取文件**，改用以下最小切片策略：
+
+| 需求 | 检索策略 |
+|------|---------|
+| 查找函数定义 | `grep "def <name>\|function <name>\|<name>(" <file>` 定位行号，只读 ±20 行 |
+| 查找类/模块结构 | `grep "^class \|^module " <file>` 获取骨架，按需展开 |
+| 查找配置项 | `grep "<key>" <config_file>` 精准定位，不读整文件 |
+| 确认文件是否存在 | `glob` 检查路径，不读内容 |
+
+> **原则**：每次对话引用代码不超过 200 行；超出时，分批读取并在 session_summary.md 中记录已读范围。
 
 ---
 
@@ -199,11 +217,41 @@ choices: [`✅ 先补完收尾`, `⏭️ 跳过，直接处理新请求`]
 > **不使用 `ask_user` 工具的多选 choices** 来呈现歧义（多维度歧义无法用单选解决），而是直接在回复文本中列出，等用户在对话框自由输入。  
 > 收到回答后将答案注入上下文，继续阶段 1.3。
 
-### 1.3 Skill 生态扫描
+### 1.3 Skill 生态扫描与一键安装
 
-使用 `glob` 动态扫描 `.github/skills/` 和 `skills/` 目录，获取当前项目所有可用 Skill 的 `SKILL.md`，读取其 `name` 与 `description` 字段，检索与当前意图匹配的 Skill：
-- 若找到相关 Skill，在计划中注记：
-  `💡 可用 Skill：/<skill-name>（将在步骤 N 调用）`
+**步骤1：扫描本地 Skill**
+
+使用 `glob` 动态扫描以下目录获取所有可用 Skill 的 `SKILL.md`，读取 `name` 与 `description` 字段，检索与当前意图匹配的 Skill：
+
+```
+~/.copilot/skills/*/SKILL.md
+.github/skills/*/SKILL.md
+skills/*/SKILL.md
+```
+
+**步骤2：匹配结果处理**
+
+- **找到本地 Skill** → 在计划中注记：
+  ```
+  💡 可用 Skill：/<skill-name>（将在步骤 N 调用）
+  ```
+  执行时直接调用 `skill <skill-name> <参数>`。
+
+- **未找到匹配 Skill** → 检查是否有社区/团队推荐 Skill，使用 `ask_user` 工具提示：
+  ```
+  💡 检测到当前任务适合使用 <skill-name> Skill，但本地未安装。
+
+  建议：将 Skill 文件放入 ~/.copilot/skills/<skill-name>/ 即可启用。
+  是否先继续执行（不使用该 Skill）？
+  ```
+  choices: [`▶️ 继续执行（跳过此 Skill）`, `⏸️ 暂停，我去安装`]
+
+  选择"暂停"后，输出安装提示：
+  ```
+  📦 安装步骤：
+  1. 获取 SKILL.md 文件放入 ~/.copilot/skills/<skill-name>/
+  2. 重新发送当前请求，conductor 将自动调用该 Skill
+  ```
 
 ### 1.4 复杂度评估（快速路径决策）
 
@@ -332,18 +380,38 @@ INSERT INTO conductor_tasks (id, title, file_path, action, depends_on) VALUES
 >   );
 > ```
 
-### 2.4 复杂度评估与模型路由注记
+### 2.4 动态模型路由与成本优化
 
-在 plan.md 末尾注记模型路由建议（供用户参考）：
+**路由决策规则**（对每个步骤独立评估）：
+
+| 复杂度判定 | 条件（满足任意一条） | 建议模型 |
+|-----------|-------------------|---------|
+| 🔴 高 | 涉及架构设计、核心算法、多文件联动重构、安全审查 | 强模型（当前会话模型） |
+| 🟡 中 | 单模块功能实现、接口改造、Bug 修复含根因分析 | 当前会话模型 |
+| 🟢 低 | 批量代码生成（模板类）、格式整理、注释同步、文档更新 | 轻量模型或当前模型（简短 prompt） |
+
+**注：Copilot 无法在运行时切换模型**，路由建议的实际意义是：
+- 🔴 **高复杂度步骤**：conductor 将传入**完整上下文 + 工作区约束 + 相关文件内容**给子代理
+- 🟡 **中复杂度步骤**：传入**步骤描述 + 最小必要上下文**
+- 🟢 **低复杂度步骤**：使用**极简 prompt**，不传入无关文件，压缩 Token 消耗
+
+**在 plan.md 中注记路由策略**：
 
 ```markdown
 ## 模型路由建议
 
-| 步骤 | 复杂度 | 建议模型 |
+| 步骤 | 复杂度 | 路由策略 |
 |------|--------|---------|
-| 步骤1 核心架构设计 | 高 | 强模型（Claude/GPT-4级） |
-| 步骤2 批量代码生成 | 低 | 轻量模型 |
+| 步骤1 核心架构设计 | 🔴 高 | 强模型：完整上下文 + 所有相关文件 |
+| 步骤2 批量代码生成 | 🟢 低 | 轻量：极简 prompt，减少 Token |
+| 步骤3 格式整理 | 🟢 低 | 轻量：仅传入文件内容，无背景 |
 ```
+
+**步骤间成本控制**：
+
+- 子代理 prompt 只包含**该步骤所需的最小文件切片**（见 0.4 RAG 策略）
+- 低复杂度步骤的子代理 prompt **不引用 memory.md 和 workspace-rules.md**（减少 Token）
+- 高复杂度步骤必须传入完整约束，不可省略
 
 ---
 
@@ -540,7 +608,7 @@ choices: [`▶️ 继续执行`, `⏸️ 暂停，我来检查一下`]
 ```
 choices: [`✅ 确认执行`, `❌ 跳过此步骤`]
 
-### 4.3 原子化提交
+### 4.3 原子化提交与安全点追踪
 
 **时机：每个步骤在 4.4 验证通过后立即执行提交**：
 
@@ -549,7 +617,63 @@ git add <变更文件>
 git commit -m "<类型>(<范围>): <对应步骤的中文描述>"
 ```
 
-将 Commit Hash 回填到 plan.md 对应步骤，并更新 SQL `commit_hash` 字段。
+提交后执行以下三步（缺一不可）：
+
+1. **获取 Commit Hash**：`git rev-parse HEAD`
+
+2. **回填到 plan.md**：用 `edit` 更新对应步骤的状态行（见 4.1 门控格式）
+
+3. **写入安全点文件**（支持一键回滚）：
+   用 `edit` 追加到 `.conductor/safe_points.md`：
+   ```markdown
+   | YYYY/MM/DD HH:MM | step_N | <步骤标题> | <commit_hash> |
+   ```
+   若 `.conductor/safe_points.md` 不存在，先创建：
+   ```markdown
+   # 安全回滚节点
+
+   > 由 conductor 在每次原子化提交后自动维护。
+   > 执行"一键回滚"时，选择此表中的任意节点即可恢复。
+
+   | 时间 | 步骤 | 描述 | Commit Hash |
+   |------|------|------|-------------|
+   ```
+
+4. **更新 SQL**：`UPDATE conductor_tasks SET status='done', commit_hash='<hash>' WHERE id='step_N'`
+
+---
+
+**一键回滚协议**
+
+当用户说"一键回滚"或"回到上一个安全节点"时：
+
+```
+conductor 执行：
+  1. 读取 .conductor/safe_points.md，列出所有安全点
+  2. 使用 ask_user 工具展示：
+```
+
+```
+🔄 可回滚到以下安全节点：
+
+  1. step_3 | <步骤标题> | 2026/04/15 14:30 | abc1234
+  2. step_2 | <步骤标题> | 2026/04/15 14:25 | def5678
+  3. step_1 | <步骤标题> | 2026/04/15 14:20 | ghi9012
+
+请选择回滚目标（输入编号）：
+```
+
+收到编号后：
+
+```bash
+# 确认回滚（高危操作，已在 4.2 中拦截确认）
+git reset --hard <selected_commit_hash>
+```
+
+回滚后：
+- 更新 plan.md：将 selected 步骤之后的所有步骤状态重置为"待执行"
+- 更新 SQL：`UPDATE conductor_tasks SET status='pending', commit_hash=NULL WHERE id IN (...)`
+- 输出：`✅ 已回滚至 <步骤标题>（commit: <hash>），后续步骤已重置为待执行`
 
 ### 4.4 Conductor 验证子代理结果
 
@@ -914,7 +1038,7 @@ glob(".github/skills/*/SKILL.md") + glob("skills/*/SKILL.md")
 | 用户选择"确认执行" | 触发阶段3审批通过，进入阶段4 |
 | 用户选择"取消" | 终止当前计划；复杂任务时 SQL `status` 全部置 `skipped`；简单任务直接终止，结束 |
 | 用户选择"y"（规则沉淀） | 修改规则文件，追加到 workspace-rules.md 用户习惯记录，同步更新 memory.md |
-| 用户回复"一键回滚" | 执行 `git reset --hard <上一个安全 commit hash>` |
+| 用户回复"一键回滚" | 读取 `.conductor/safe_points.md`，展示安全节点列表，用户选择后执行 `git reset --hard <hash>`（详见 4.3 一键回滚协议） |
 
 ---
 
