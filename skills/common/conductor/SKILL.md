@@ -80,7 +80,9 @@ rule/**/*.md
 
 #### 步骤 B：更新 `.conductor/workspace-rules.md`
 
-无论 `workspace-rules.md` 是否已存在，**每次阶段 0 都必须更新本文件**（非覆盖，而是合并：保留已有"用户习惯"章节，只刷新"来源文件"和"生效约束"章节）。
+无论 `workspace-rules.md` 是否已存在，**每次阶段 0 都必须更新本文件**：
+- **不存在** → 用 `templates/workspace-rules.md` 初始化（替换 `{{WORKSPACE_NAME}}` 为当前目录名，`{{DATE}}` 为今日日期），再刷新"来源文件"和"生效约束"章节。
+- **已存在** → 合并更新：**保留**"用户习惯记录"和"同步记录"章节（只追加），**刷新**"来源文件"和"生效约束"章节。
 
 文件结构如下：
 
@@ -447,7 +449,35 @@ choices: [`[y] 自动写入规则文件`, `[r] 仅记录到 workspace-rules.md`,
 
 > 用户习惯记录会在下次阶段 0.2 时被读取并合并到"生效约束"，实现跨会话习惯积累。
 
-### 5.2 执行摘要生成
+### 5.2 规则同步到工作区指令文件
+
+**触发时机（满足任一条件时主动提示）：**
+- 本次任务结束后"用户习惯记录"新增了 ≥ 2 条且尚未同步
+- 用户显式说"更新规则文件" / "写入项目指令"
+- `.github/copilot-instructions.md` 不存在（新工作区首次使用）
+
+**触发后**，使用 `ask_user` 工具询问：
+
+```
+📋 当前工作区已积累以下规则约束：
+  - <列出 workspace-rules.md 生效约束中尚未写入项目指令的条目>
+
+是否将这些约束写入 .github/copilot-instructions.md？
+（写入后，不依赖 conductor 也能加载这些规则）
+```
+choices: [`✅ 写入项目指令文件`, `📝 仅保留在 workspace-rules.md`, `❌ 跳过`]
+
+**选择"写入"后**：
+1. 读取现有 `.github/copilot-instructions.md`（若不存在则创建）
+2. 在文件末尾追加一节 `## 工作区习惯约束（由 conductor 归纳）`，写入新增约束条目
+3. 在 `workspace-rules.md` 的"同步记录"表中追加一行：`| 日期 | 同步内容摘要 | conductor |`
+4. Git Commit：`chore(conductor): 将工作区约束同步到项目指令文件`
+
+> **不覆盖 `.github/copilot-instructions.md` 中已有内容**，只追加新节，避免破坏人工维护的规则。
+
+### 5.3 执行摘要生成
+
+### 5.3 执行摘要生成
 
 **复杂任务**：从 SQL 汇总最终状态：
 
@@ -475,7 +505,7 @@ SELECT status, COUNT(*) as cnt FROM conductor_tasks GROUP BY status;
 Git Commits：a1b2c3d, e4f5g6h
 ```
 
-### 5.3 Git 联动
+### 5.4 Git 联动
 
 执行摘要后使用 `ask_user` 工具询问：
 
@@ -485,7 +515,7 @@ Git Commits：a1b2c3d, e4f5g6h
 ```
 choices: [`[y] 自动创建并推送`, `[b] 仅创建分支不推送`, `[n] 跳过`]
 
-### 5.4 跨会话记忆持久化
+### 5.5 跨会话记忆持久化
 
 将本次任务中的关键决策**追加**写入 `.conductor/memory.md`（0.1 阶段已确保文件存在）。
 
