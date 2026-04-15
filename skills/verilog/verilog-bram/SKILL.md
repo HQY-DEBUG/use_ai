@@ -2,7 +2,7 @@
 name: verilog-bram
 description: 生成 BRAM 模块模板（单端口/双端口/ROM），支持 $readmemh 初始化。用法：/verilog-bram <模块名> <类型:sp|dp|rom> [深度] [数据位宽] [初始化文件]
 argument-hint: <模块名> <类型:sp|dp|rom> [深度] [数据位宽] [初始化文件]
-allowed-tools: [Write]
+allowed-tools: [Write, create]
 ---
 
 # 生成 BRAM 模块模板

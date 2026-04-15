@@ -2,7 +2,7 @@
 name: gitignore
 description: 生成或更新 .gitignore 文件，按分类追加条目。用法：/gitignore [section...] 可选分类：os vscode qt python vitis vivado matlab c claude。不带参数则追加所有常用分类。
 argument-hint: [os] [vscode] [qt] [python] [vitis] [vivado] [matlab] [c] [claude]
-allowed-tools: [Read, Write, Edit, Bash]
+allowed-tools: [Read, Write, Edit, Bash, view, create, edit, powershell]
 disable-model-invocation: true
 ---
 

@@ -2,7 +2,7 @@
 name: verilog-tb
 description: 为指定 Verilog 模块生成 Testbench 框架。用法：/verilog-tb <模块名> [端口列表]
 argument-hint: <模块名> [端口列表，逗号分隔]
-allowed-tools: [Read, Glob, Grep, Write]
+allowed-tools: [Read, Glob, Grep, Write, view, glob, grep, create]
 disable-model-invocation: true
 ---
 

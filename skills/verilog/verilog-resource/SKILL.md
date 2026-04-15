@@ -2,7 +2,7 @@
 name: verilog-resource
 description: 对 Verilog RTL 文件进行资源分析，估算 LUT/FF/BRAM/DSP 使用量，给出优化建议。用法：/verilog-resource <文件路径>
 argument-hint: <文件路径>
-allowed-tools: [Read, Glob, Grep]
+allowed-tools: [Read, Glob, Grep, view, glob, grep]
 disable-model-invocation: true
 ---
 

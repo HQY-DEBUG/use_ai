@@ -2,7 +2,7 @@
 name: conductor
 description: 全局编排代理——每次用户提问后作为隐形前置 Agent 自动接管，完成习惯学习、歧义消除、计划生成、并行执行、校验闭环和上下文记忆全链路编排。用法：/conductor <需求描述>（也可通过 copilot-instructions 无感激活）
 argument-hint: <需求描述（也可省略，直接接收上下文中的用户意图）>
-allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, TodoWrite, WebSearch, Diff]
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, TodoWrite, WebSearch, Diff, view, create, edit, powershell, glob, grep, sql, web_fetch]
 ---
 
 # Conductor — 全局编排代理

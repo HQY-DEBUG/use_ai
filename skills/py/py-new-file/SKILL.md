@@ -2,7 +2,7 @@
 name: py-new-file
 description: 新建符合项目规范的 Python 文件，自动生成文件头、模块 docstring 和函数框架。用法：/py-new-file <文件名（不含.py）> [模块描述]
 argument-hint: <文件名> [模块描述]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 ---
 
 # 新建 Python 文件

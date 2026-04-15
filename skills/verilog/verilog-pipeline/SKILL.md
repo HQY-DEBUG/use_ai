@@ -2,7 +2,7 @@
 name: verilog-pipeline
 description: 生成带 valid/ready 握手的多级流水线模块模板。用法：/verilog-pipeline <模块名> <级数> [数据位宽]
 argument-hint: <模块名> <级数2-8> [数据位宽，默认16]
-allowed-tools: [Write, Bash]
+allowed-tools: [Write, Bash, create, powershell]
 disable-model-invocation: true
 ---
 

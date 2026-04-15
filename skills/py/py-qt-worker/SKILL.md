@@ -2,7 +2,7 @@
 name: py-qt-worker
 description: 生成 PyQt5 QThread 工作线程模板（网络/串口/耗时任务）。用法：/py-qt-worker <类名> [描述]
 argument-hint: <类名（大驼峰）> [描述，如 UDP接收线程]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 ---
 
 # 生成 PyQt5 工作线程模板

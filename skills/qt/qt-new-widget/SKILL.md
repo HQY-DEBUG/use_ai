@@ -2,7 +2,7 @@
 name: qt-new-widget
 description: 生成 QWidget UI 组件类的 .h/.cpp 模板（纯 UI，不含耗时逻辑）。用法：/qt-new-widget <类名（大驼峰）> [描述]
 argument-hint: <类名（大驼峰）> [描述]
-allowed-tools: [Read, Write]
+allowed-tools: [Read, Write, view, create]
 disable-model-invocation: true
 ---
 

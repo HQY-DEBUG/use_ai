@@ -2,7 +2,7 @@
 name: verilog-fifo
 description: 生成同步或异步 FIFO 模块模板。用法：/verilog-fifo <模块名> <类型:sync|async> [深度] [数据位宽]
 argument-hint: <模块名> <sync|async> [深度，默认16] [数据位宽，默认8]
-allowed-tools: [Write, Bash]
+allowed-tools: [Write, Bash, create, powershell]
 disable-model-invocation: true
 ---
 

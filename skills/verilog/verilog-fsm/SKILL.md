@@ -2,7 +2,7 @@
 name: verilog-fsm
 description: 生成符合项目规范的 Verilog 有限状态机（FSM）模板。用法：/verilog-fsm <模块名> <状态列表（逗号分隔）>
 argument-hint: <模块名> <状态1,状态2,状态3,...>
-allowed-tools: [Write, Bash]
+allowed-tools: [Write, Bash, create, powershell]
 disable-model-invocation: true
 ---
 

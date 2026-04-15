@@ -2,7 +2,7 @@
 name: verilog-timing
 description: 分析 Verilog RTL 时序风险，识别关键路径、CDC 问题，生成 XDC 约束建议。用法：/verilog-timing <文件路径> [目标频率MHz]
 argument-hint: <文件路径> [目标频率，默认200]
-allowed-tools: [Read, Glob, Grep]
+allowed-tools: [Read, Glob, Grep, view, glob, grep]
 disable-model-invocation: true
 ---
 

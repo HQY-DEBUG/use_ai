@@ -2,7 +2,7 @@
 name: qt-new-class
 description: 新建 Qt C++ 类文件，自动生成符合项目规范的文件头、Q_OBJECT、信号槽声明和线程安全框架。用法：/qt-new-class <类名> [用途描述]
 argument-hint: <类名（大驼峰）> [用途描述]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 disable-model-invocation: true
 ---
 

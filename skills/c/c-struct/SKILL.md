@@ -2,7 +2,7 @@
 name: c-struct
 description: 生成符合项目规范的 C 结构体定义，含 Doxygen 注释和字段对齐。用法：/c-struct <结构体名> <字段列表>
 argument-hint: <结构体名> <字段（类型:名称:说明 ...）>
-allowed-tools: [Write, Read]
+allowed-tools: [Write, Read, create, view]
 ---
 
 # 生成 C 结构体定义

@@ -2,7 +2,7 @@
 name: parse
 description: 将模糊的自然语言需求解析为结构化任务列表，展示后自动逐步执行。用法：/parse <你的需求描述>
 argument-hint: <需求描述>
-allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+allowed-tools: [view, create, edit, powershell, grep, glob, ask_user, report_intent]
 ---
 
 # 需求解析与执行
@@ -19,13 +19,7 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 - 实现方式有多种可能且差异显著
 - 关键参数缺失（如版本号、文件名、字段名等）
 
-若存在歧义，**立即提问，不要假设，不要继续执行**：
-
-```
-在解析前需确认以下问题：
-1. <问题1>
-2. <问题2>
-```
+若存在歧义，**调用 `ask_user` 工具逐一提问，不假设，不继续执行**。
 
 收到用户回答后，将答案整合进需求，再进入第一步。
 

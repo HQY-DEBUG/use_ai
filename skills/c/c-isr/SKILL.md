@@ -2,7 +2,7 @@
 name: c-isr
 description: 生成 Vitis/裸机中断服务程序框架（XScuGic 注册 + ISR 函数骨架）。用法：/c-isr <中断名> <中断号> [触发方式]
 argument-hint: <中断名> <中断号（十六进制）> [触发方式：rising|falling|high|low，默认rising]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 ---
 
 # 生成 Vitis 中断服务程序框架

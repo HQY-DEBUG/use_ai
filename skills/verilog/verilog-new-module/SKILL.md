@@ -2,7 +2,7 @@
 name: verilog-new-module
 description: 新建 Verilog 模块文件，自动生成符合项目规范的文件头、端口声明和模块框架。用法：/verilog-new-module <模块名> [描述]
 argument-hint: <模块名> [模块功能描述]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 disable-model-invocation: true
 ---
 

@@ -2,7 +2,7 @@
 name: verilog-tb-assert
 description: 为已有 Testbench 添加自动校验断言和结果统计逻辑。用法：/verilog-tb-assert <tb文件路径>
 argument-hint: <tb文件路径>
-allowed-tools: [Read, Edit]
+allowed-tools: [Read, Edit, view, edit]
 disable-model-invocation: true
 ---
 

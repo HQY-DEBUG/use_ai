@@ -2,7 +2,7 @@
 name: c-fsm
 description: 生成 C 语言状态机框架（状态枚举、switch-case 转移、动作函数骨架）。用法：/c-fsm <模块名> <状态列表>
 argument-hint: <模块名> <状态列表（空格分隔）>
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 ---
 
 # 生成 C 语言状态机框架
