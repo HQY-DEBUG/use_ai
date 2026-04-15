@@ -11,11 +11,13 @@ allowed-tools: [view, create, edit, powershell, grep, glob, sql, ask_user, task,
 
 ## 支持资源
 
-| 文件 | 用途 |
-|------|------|
-| `templates/plan.md` | 生成 `.conductor/plan.md` 时使用的标准模板，替换 `{{占位符}}` |
-| `templates/memory.md` | 初始化 `.conductor/memory.md` 时使用的标准模板 |
-| `example/plan.md` | 完整执行计划示例（含 Verilog 奇偶校验任务），用于校准输出格式 |
+| 文件 | 用途 | 使用阶段 |
+|------|------|---------|
+| `templates/plan.md` | 生成 `.conductor/plan.md` 时使用的标准模板，替换 `{{占位符}}` | Phase 2.2 |
+| `templates/memory.md` | 初始化 `.conductor/memory.md` 时使用的标准模板 | Phase 0.1 |
+| `templates/workspace-rules.md` | 初始化 `.conductor/workspace-rules.md` 时使用的标准模板 | Phase 0.2 |
+| `templates/session_summary.md` | 上下文压缩时写入 `.conductor/session_summary.md` 使用的标准模板 | Phase 0.4 |
+| `example/plan.md` | 完整执行计划示例（含 Verilog 奇偶校验任务），用于校准输出格式 | Phase 2.2 |
 
 ---
 
