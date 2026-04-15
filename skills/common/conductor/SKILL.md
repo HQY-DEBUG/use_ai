@@ -55,46 +55,70 @@ Conductor 按以下六个阶段顺序执行。**每个阶段开头调用 `report
 ```
 > `.conductor/` 存储的是临时执行状态和用户偏好，不应纳入版本控制。若项目需要共享 memory.md，可在 `.gitignore` 中手动排除该文件。
 
-### 0.2 工作区习惯扫描
+### 0.2 工作区习惯扫描与规则文件维护
 
-扫描以下规则文件（若存在则读取）：
+工作区规则分两个来源：**规则文件扫描** 和 **用户行为习惯观察**，两者最终都汇入 `.conductor/workspace-rules.md`。
 
-| 文件 | 提取内容 |
-|------|---------|
-| `.editorconfig` | 缩进字符/宽度、行尾符、字符集 |
-| `.prettierrc` / `prettier.config.*` | 格式化规则（引号、分号、宽度等） |
-| `.eslintrc*` / `eslint.config.*` | JS/TS lint 规则 |
-| `pyproject.toml` / `setup.cfg` | Python 格式化、lint 配置 |
-| `.clang-format` | C/C++ 格式化规则 |
-| `tsconfig.json` | TypeScript 编译约束 |
-| `.github/copilot-instructions.md` | 项目自定义指令 |
-| `rule/` 目录下所有 `.md` 文件 | 项目级规范文档 |
+#### 步骤 A：规则文件扫描
 
-将提取到的约束合并为 **隐式约束集**，注入后续所有代码生成与修改操作。
+使用 `glob` 扫描以下文件（全部读取完整内容，不限于某几个字段）：
 
-**扫描结束后，将结果持久化写入 `.conductor/workspace-rules.md`**（覆盖写入）：
+```
+.editorconfig
+.prettierrc  /  prettier.config.*  /  .prettierrc.json
+.eslintrc*   /  eslint.config.*
+pyproject.toml  /  setup.cfg
+.clang-format
+tsconfig.json
+.github/copilot-instructions.md
+rule/**/*.md
+```
+
+- **文件存在** → 完整读取，从中归纳所有约束条目（缩进、引号、命名、提交格式、语言等）。
+- **文件不存在** → 跳过，不报错；最终在 `workspace-rules.md` 中标注"未找到"。
+- **所有文件均不存在** → 读取 `~/.copilot/copilot-instructions.md`（全局通用规则）作为兜底来源，标注来源为"全局默认"。
+
+#### 步骤 B：更新 `.conductor/workspace-rules.md`
+
+无论 `workspace-rules.md` 是否已存在，**每次阶段 0 都必须更新本文件**（非覆盖，而是合并：保留已有"用户习惯"章节，只刷新"来源文件"和"生效约束"章节）。
+
+文件结构如下：
 
 ```markdown
 # 工作区规则汇总
 
-> 生成时间：YYYY/MM/DD HH:MM（由 conductor 自动生成，勿手动编辑）
+> 最后更新：YYYY/MM/DD HH:MM（由 conductor 自动维护）
 
 ## 来源文件
 
-| 来源 | 提取内容 |
-|------|---------|
-| `.editorconfig` | 缩进：4空格，行尾符：LF |
-| `.github/copilot-instructions.md` | 语言：中文，提交格式：Conventional Commits |
-| （未找到）`.prettierrc` | 使用默认配置 |
+| 来源 | 状态 | 归纳约束 |
+|------|------|---------|
+| `.editorconfig` | ✅ 已读取 | 缩进：4空格，行尾符：LF |
+| `.github/copilot-instructions.md` | ✅ 已读取 | 语言：中文，提交：Conventional Commits |
+| `.prettierrc` | ❌ 未找到 | — |
+| 全局 `~/.copilot/copilot-instructions.md` | ✅ 兜底 | 参见全局规范 |
 
-## 生效约束
+## 生效约束（Conductor 在所有代码生成中强制遵守）
 
-- 缩进：4空格（来自 .editorconfig）
+- 缩进：4空格
 - 注释语言：中文
-- ...
+- 提交格式：`<类型>(<范围>): <中文描述>`
+- 命名：小写下划线（Python/C），大驼峰（类名）
+- ...（从来源文件中归纳，每条标注来源）
+
+## 用户习惯记录（观察积累，不自动清空）
+
+| 日期 | 观察到的习惯 | 已应用到约束 |
+|------|------------|------------|
+| 2026/04/15 | 将双引号改为单引号（连续 2 次） | ✅ 已加入生效约束 |
+| 2026/04/15 | 函数注释使用中文 docstring | ✅ 已加入生效约束 |
 ```
 
-> 若**所有规则文件均不存在**，从 `~/.copilot/copilot-instructions.md`（全局通用规则）提取约束，并在文件中注明来源为"全局默认"。
+> **"用户习惯记录"章节只追加，永不覆盖**，是 conductor 跨会话学习用户偏好的核心数据。
+
+#### 步骤 C：注入隐式约束集
+
+将 `workspace-rules.md` 中"生效约束"章节的所有条目加载为当前会话的**隐式约束集**，后续所有代码生成、修改、注释操作均自动遵守，无需用户重复声明。
 
 ### 0.3 上下文窗口状态评估
 
@@ -414,7 +438,15 @@ git commit -m "<类型>(<范围>): <对应步骤的中文描述>"
 是否将此偏好写入项目规则文件？
   → 写入 `.prettierrc`：`"singleQuote": true`
 ```
-choices: [`[y] 自动写入`, `[n] 忽略`, `[s] 本次跳过但下次再问`]
+choices: [`[y] 自动写入规则文件`, `[r] 仅记录到 workspace-rules.md`, `[n] 忽略`, `[s] 本次跳过但下次再问`]
+
+**无论用户选择哪项（除 [n] 外）**，都将该习惯追加到 `.conductor/workspace-rules.md` 的"用户习惯记录"表：
+
+```markdown
+| 2026/04/15 | <观察到的习惯描述> | ✅ 已加入生效约束 / 📝 仅记录 |
+```
+
+> 用户习惯记录会在下次阶段 0.2 时被读取并合并到"生效约束"，实现跨会话习惯积累。
 
 ### 5.2 执行摘要生成
 
