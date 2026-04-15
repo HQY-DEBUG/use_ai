@@ -19,6 +19,18 @@ allowed-tools: [view, create, edit, powershell, grep, glob, sql, ask_user, task,
 | `templates/session_summary.md` | 上下文压缩时写入 `.conductor/session_summary.md` 使用的标准模板 | Phase 0.4 |
 | `example/plan.md` | 完整执行计划示例（含 Verilog 奇偶校验任务），用于校准输出格式 | Phase 2.2 |
 
+**运行时自动创建的文件（无模板，由 conductor 直接生成）：**
+
+| 文件 | 用途 | 创建阶段 |
+|------|------|---------|
+| `.conductor/plan.md` | 当前任务执行计划 | Phase 2.2 |
+| `.conductor/memory.md` | 跨会话架构记忆 | Phase 0.1 |
+| `.conductor/workspace-rules.md` | 工作区习惯规则 | Phase 0.2 |
+| `.conductor/session_summary.md` | 上下文压缩快照 | Phase 0.4 |
+| `.conductor/safe_points.md` | 原子提交安全点记录 | Phase 4.3 |
+| `.conductor/loop.log` | Ralph Loop 续跑日志 | Phase 5.6 |
+| `.conductor/errors/step_N_*.log` | 步骤失败诊断日志 | Phase 4.4 |
+
 ---
 
 ## 运行协议总览
@@ -80,10 +92,10 @@ Conductor 按以下六个阶段顺序执行。**每个阶段开头调用 `report
 │   5.5 ⛔ memory.md 持久化（无条件四步写入）            │     │
 └────────────────────────────────────────────────────┘     │
       ↓                                                     │
-  Ralph Loop：SQL 中还有 pending/in_progress？               │
+  5.6 Ralph Loop：SQL 中还有 pending/in_progress？            │
       ├── 是 → 自动续跑 ──────────────────────────────────────┘
       └── 否 ↓
-         ⛔ 5.6 完成检查清单（全部打勾后才能结束）
+         ⛔ 5.7 完成检查清单（全部打勾后才能结束）
 ```
 
 > **简单任务**跳过阶段 2/3，但**必须完整执行阶段 5**（5.1 习惯归纳、5.3 摘要、5.5 memory.md 均不可跳过）。
@@ -807,19 +819,24 @@ plan 要求 删除     → 对应文件必须不存在
 
 **进入本阶段前先判断任务类型**：
 
-| 任务类型 | 5.1习惯归纳 | 5.2规则同步 | 5.3摘要 | 5.4 Git | 5.5 Ralph Loop | 5.6清单 | memory.md |
-|---------|-----------|-----------|--------|--------|--------------|--------|---------|
+| 任务类型 | 5.1习惯归纳 | 5.2规则同步 | 5.3摘要 | 5.4 Git | 5.5 memory.md | 5.6 Ralph Loop | 5.7清单 |
+|---------|-----------|-----------|--------|--------|--------------|--------------|--------|
 | **复杂任务** | ✅ | 条件触发 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **简单任务** | ✅ | 条件触发 | ✅（简短版） | ✅ | ⏭️ 跳过 | ✅ 检查3项 | ✅ 若有决策 |
+| **简单任务** | ✅ | 条件触发 | ✅（简短版） | ✅ | ✅ 无条件写入 | ⏭️ 跳过 | ✅ 检查3项 |
 
 ### 5.1 规则自动沉淀（每次任务结束必须执行）
 
+> ⛔ **STOP：本节第一步为无条件强制执行，不得跳过。**
+
 **第一步：无条件写入执行记录**
 
-用 `edit` 工具在 `workspace-rules.md` 的"执行记录"章节追加一行：
-```markdown
+调用 `edit` 工具在 `workspace-rules.md` 的"执行记录"章节末尾追加一行：
+```
+old_str: [执行记录表最后一行]
+new_str: [执行记录表最后一行]
 | YYYY/MM/DD | <本次任务一句话摘要> | <变更文件列表> |
 ```
+**⛔ 验证：** 调用 `view .conductor/workspace-rules.md` 确认新行已写入。若未写入，重新执行。
 
 **第二步：习惯推理（分析提问记录，有新结论则写入）**
 
@@ -1025,7 +1042,7 @@ new_str: > 最后更新：YYYY/MM/DD
 
 若验证失败（内容未更新），重新执行第1-3步。写入成功后继续。
 
-### 5.5 自动续跑（Ralph Loop）
+### 5.6 自动续跑（Ralph Loop）
 
 > **核心思想**：Conductor 执行完一批步骤后，主动检查是否还有未完成的工作。若有，自动循环续跑，**不等用户输入 continue**。
 
@@ -1060,7 +1077,7 @@ SELECT COUNT(*) AS remaining FROM conductor_tasks WHERE status IN ('pending', 'i
 2026/04/15 14:31 - Ralph Loop 结束：全部完成
 ```
 
-### 5.6 完成检查清单（硬门槛）
+### 5.7 完成检查清单（硬门槛）
 
 > ⛔ **在此清单全部打勾之前，禁止结束任务、禁止调用 `task_complete`。**  
 > 简单任务使用 ★ 标注的3项即可，其余项目跳过。
@@ -1068,12 +1085,12 @@ SELECT COUNT(*) AS remaining FROM conductor_tasks WHERE status IN ('pending', 'i
 逐项检查，全部满足后才能结束：
 
 ```
-[ ] ★ 已输出执行摘要（5.3）                        ← 简单/复杂 均必须
-[ ] ★ memory.md 已检查（有决策则追加，无则注明"无新决策"）← 简单/复杂 均必须
-[ ] ★ Git 联动已处理（5.4，即使用户选择跳过也算处理完）← 简单/复杂 均必须
-[ ]   plan.md 中所有步骤状态已更新                  ← 复杂任务专用
-[ ]   SQL conductor_tasks 中无 pending/in_progress ← 复杂任务专用
-[ ]   Ralph Loop 已确认结束（remaining=0 或熔断汇报）← 复杂任务专用
+[ ] ★ 已输出执行摘要（5.3）                                   ← 简单/复杂 均必须
+[ ] ★ memory.md 已完成四步写入（5.5：执行记录 + 时间戳 + view验证）← 简单/复杂 均必须
+[ ] ★ Git 联动已处理（5.4，即使用户选择跳过也算处理完）          ← 简单/复杂 均必须
+[ ]   plan.md 中所有步骤状态已更新                             ← 复杂任务专用
+[ ]   SQL conductor_tasks 中无 pending/in_progress            ← 复杂任务专用
+[ ]   Ralph Loop 已确认结束（5.6：remaining=0 或熔断汇报）      ← 复杂任务专用
 ```
 
 > **特别注意**：简单任务结束时，就算没有 plan.md 和 SQL，也必须完成前3项（★）才能调用 `task_complete`。
@@ -1104,7 +1121,9 @@ SELECT COUNT(*) AS remaining FROM conductor_tasks WHERE status IN ('pending', 'i
 在阶段 1.3，使用 `glob` 动态扫描获取实际可用 Skill 列表，而非依赖静态表格：
 
 ```
-glob(".github/skills/*/SKILL.md") + glob("skills/*/SKILL.md")
+glob("~/.copilot/skills/*/SKILL.md")
+glob(".github/skills/*/SKILL.md")
+glob("skills/*/SKILL.md")
 ```
 
 读取每个 SKILL.md 的 `name` 和 `description` 字段，与当前任务意图进行语义匹配。
