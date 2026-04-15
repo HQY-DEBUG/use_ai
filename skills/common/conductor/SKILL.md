@@ -30,8 +30,8 @@ Conductor 按以下六个阶段顺序执行。**每个阶段开头调用 `report
          简单任务 → 直接执行（跳过阶段2/3）
          复杂任务 ↓
 阶段 2 → 计划生成       （输出 plan.md + SQL 任务表）
-阶段 3 → 人工审批门     （强制暂停等待确认）
-阶段 4 → 自动化执行     （驱动 plan.md + 更新 SQL 状态）
+阶段 3 → 审批门         （仅高危操作/歧义时暂停，否则自动继续）
+阶段 4 → 自动化执行     （驱动 plan.md + 实时更新 SQL 和 plan.md）
 阶段 5 → 收尾与记忆     （摘要、Git、沉淀）
 ```
 
@@ -47,7 +47,13 @@ Conductor 按以下六个阶段顺序执行。**每个阶段开头调用 `report
 
 检查 `.conductor/memory.md` 是否存在：
 - 存在 → 读取并在后续阶段中继承已决策的架构偏好、技术选型、命名约定。
-- 不存在 → 跳过，继续。
+- **不存在 → 立即使用 `templates/memory.md` 初始化创建 `.conductor/memory.md`**，填入当前工作区名称（当前目录名）、日期，然后继续。
+
+**同时检查 `.gitignore`**（若存在）：若其中不包含 `.conductor/`，自动追加一行：
+```
+.conductor/
+```
+> `.conductor/` 存储的是临时执行状态和用户偏好，不应纳入版本控制。若项目需要共享 memory.md，可在 `.gitignore` 中手动排除该文件。
 
 ### 0.2 工作区习惯扫描
 
@@ -65,6 +71,30 @@ Conductor 按以下六个阶段顺序执行。**每个阶段开头调用 `report
 | `rule/` 目录下所有 `.md` 文件 | 项目级规范文档 |
 
 将提取到的约束合并为 **隐式约束集**，注入后续所有代码生成与修改操作。
+
+**扫描结束后，将结果持久化写入 `.conductor/workspace-rules.md`**（覆盖写入）：
+
+```markdown
+# 工作区规则汇总
+
+> 生成时间：YYYY/MM/DD HH:MM（由 conductor 自动生成，勿手动编辑）
+
+## 来源文件
+
+| 来源 | 提取内容 |
+|------|---------|
+| `.editorconfig` | 缩进：4空格，行尾符：LF |
+| `.github/copilot-instructions.md` | 语言：中文，提交格式：Conventional Commits |
+| （未找到）`.prettierrc` | 使用默认配置 |
+
+## 生效约束
+
+- 缩进：4空格（来自 .editorconfig）
+- 注释语言：中文
+- ...
+```
+
+> 若**所有规则文件均不存在**，从 `~/.copilot/copilot-instructions.md`（全局通用规则）提取约束，并在文件中注明来源为"全局默认"。
 
 ### 0.3 上下文窗口状态评估
 
@@ -243,25 +273,38 @@ INSERT INTO conductor_tasks (id, title, file_path, action, depends_on) VALUES
 
 ---
 
-## 阶段 3：人工审批门（强制暂停）
+## 阶段 3：审批门
 
-**调用 `report_intent("等待用户审批")`。**
+**调用 `report_intent("审批计划")`。**
 
-计划生成后**使用 `ask_user` 工具等待用户确认，不自动继续**：
+### 3.1 风险评估
 
-询问内容：
+评估计划是否满足**任一高风险条件**：
+- 包含删除文件/目录操作
+- 包含 `git reset --hard` / `git push --force` / `git rebase`
+- 包含覆盖现有非空文件（无 Git 备份）
+- 用户意图描述存在仍未消除的歧义
+
+**若无高风险条件** → **直接跳过审批，进入阶段 4 自动执行**。在对话中输出：
+```
+📋 计划已生成（无高危操作），自动开始执行...
+```
+
+**若存在高风险条件** → 调用 `ask_user` 工具暂停等待确认：
+
 ```
 📋 计划已生成：.conductor/plan.md
 
-请审阅上述计划，确认无误后选择操作：
+⚠️ 检测到高危操作：
+  - <具体操作描述及影响>
+
+请审阅后选择：
 ```
 
 choices:
 - `✅ 确认执行`
 - `✏️ 需要修改计划`
 - `❌ 取消`
-
-若计划包含高危操作（删除文件/`git reset`），在询问文字中列出具体路径和影响。
 
 收到"确认执行"后，进入阶段 4。  
 收到"需要修改"后，请求用户说明修改意见，更新 plan.md 和 SQL，重新进入阶段 3。  
@@ -286,10 +329,10 @@ UPDATE conductor_tasks SET status = 'in_progress' WHERE id = 'step_N';
 - **严格按依赖关系执行**，不跳步、不合并。
 - **并行执行**：先用 SQL 查询所有"可立即执行"（无 pending 依赖）的任务，若有 ≥ 2 个，使用 `task` 工具启动并行子代理（每个子代理负责一个步骤），并在执行前提示：
   `⚡ 步骤 X 与步骤 Y 无依赖关系，启动并行执行...`
-- **每完成一个步骤**同步更新 SQL 和 plan.md：
-  - 完成：`UPDATE conductor_tasks SET status = 'done', commit_hash = 'abc1234' WHERE id = 'step_N'`；plan.md 中更新 `- [x] 状态：✅ 完成（HH:MM，commit: abc1234）`
-  - 失败：`UPDATE conductor_tasks SET status = 'failed' WHERE id = 'step_N'`；plan.md 标记 `❌`
-  - 跳过：`UPDATE conductor_tasks SET status = 'skipped' WHERE id = 'step_N'`；plan.md 标记 `⏭️`
+- **每完成一个步骤**同步更新 SQL **和 plan.md**（两者必须同步，缺一不可）：
+  - 完成：`UPDATE conductor_tasks SET status = 'done', commit_hash = 'abc1234' WHERE id = 'step_N'`；**立即用 `edit` 工具修改 plan.md**，将该步骤的 `- [ ] 状态：待执行` 改为 `- [x] 状态：✅ 完成（HH:MM，commit: abc1234）`
+  - 失败：SQL `status = 'failed'`；**立即更新 plan.md** 标记 `❌ 失败（HH:MM）`
+  - 跳过：SQL `status = 'skipped'`；**立即更新 plan.md** 标记 `⏭️ 跳过`
 
 ### 4.2 破坏性操作拦截
 
