@@ -2,7 +2,7 @@
 name: c-lint
 description: 静态审查 C/C++ 文件的逻辑质量问题（空指针、资源泄漏、未检查返回值等）。用法：/c-lint <文件路径>
 argument-hint: <文件路径>
-allowed-tools: [Read, Glob]
+allowed-tools: [Read, Glob, view, glob]
 ---
 
 # C/C++ 静态质量审查

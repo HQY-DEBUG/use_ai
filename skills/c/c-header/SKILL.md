@@ -2,7 +2,7 @@
 name: c-header
 description: 为已有 .c 文件生成或同步对应的 .h 头文件（函数声明、类型导出、include guard）。用法：/c-header <.c文件路径>
 argument-hint: <.c文件路径>
-allowed-tools: [Read, Write, Edit]
+allowed-tools: [Read, Write, Edit, view, create, edit]
 ---
 
 # 生成 / 同步 C 头文件

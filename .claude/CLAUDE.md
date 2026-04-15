@@ -28,6 +28,8 @@
 
 | 技能 | 功能 |
 |------|------|
+| `/conductor <需求描述>` | 全局编排代理：自动完成习惯学习、歧义消除、DAG 计划生成、并行执行、校验闭环与跨会话记忆 |
+| `/parse <需求描述>` | 将模糊需求解析为结构化任务列表并自动逐步执行 |
 | `/gitignore [分类...]` | 生成或更新 `.gitignore`（os/vscode/qt/python/vitis/vivado/matlab/c/claude） |
 | `/doc-update <文件> [版本] [说明]` | 更新 Markdown 文档版本记录表 |
 | `/axi-interface <模块名> lite\|stream [位宽]` | 生成 AXI-Lite / AXI-Stream 从机接口模板 |

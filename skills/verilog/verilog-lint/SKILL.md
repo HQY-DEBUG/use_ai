@@ -2,7 +2,7 @@
 name: verilog-lint
 description: 审查 Verilog/SystemVerilog 文件的 RTL 质量问题（与工具无关）。用法：/verilog-lint <文件路径>
 argument-hint: <文件路径>
-allowed-tools: [Read, Glob, Grep]
+allowed-tools: [Read, Glob, Grep, view, glob, grep]
 disable-model-invocation: true
 ---
 

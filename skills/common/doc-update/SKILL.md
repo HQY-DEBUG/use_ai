@@ -2,7 +2,7 @@
 name: doc-update
 description: 检查并更新 Markdown 文档的版本记录表。用法：/doc-update <文件路径> [版本号] [修改内容]
 argument-hint: <文件路径> [版本号，如v1.2] [修改内容描述]
-allowed-tools: [Read, Edit]
+allowed-tools: [Read, Edit, view, edit]
 disable-model-invocation: true
 ---
 

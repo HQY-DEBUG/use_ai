@@ -2,7 +2,7 @@
 name: verilog-sim
 description: 使用 iverilog 编译并运行 Verilog 仿真，解析输出结果，报告通过/失败。用法：/verilog-sim <tb文件路径> [dut文件路径...]
 argument-hint: <tb文件> [dut文件1 dut文件2 ...]
-allowed-tools: [Read, Glob, Grep, Bash]
+allowed-tools: [Read, Glob, Grep, Bash, view, glob, grep, powershell]
 disable-model-invocation: true
 ---
 

@@ -2,7 +2,7 @@
 name: c-review
 description: 审查 C/C++ 文件是否符合项目编码规范。用法：/c-review <文件路径>
 argument-hint: <文件路径>
-allowed-tools: [Read, Glob, Grep]
+allowed-tools: [Read, Glob, Grep, view, glob, grep]
 disable-model-invocation: true
 ---
 

@@ -2,7 +2,7 @@
 name: verilog-inst
 description: 读取 Verilog 模块文件，生成符合项目规范的例化代码（端口对齐、参数覆盖）。用法：/verilog-inst <文件路径> [实例名]
 argument-hint: <文件路径> [实例名]
-allowed-tools: [Read]
+allowed-tools: [Read, view]
 ---
 
 # 生成 Verilog 模块例化代码

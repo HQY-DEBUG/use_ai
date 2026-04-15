@@ -2,7 +2,7 @@
 name: verilog-cdc
 description: 生成时钟域交叉（CDC）同步器模板。用法：/verilog-cdc <模块名> <类型:1bit|handshake|pulse>
 argument-hint: <模块名> <1bit|handshake|pulse>
-allowed-tools: [Write, Bash]
+allowed-tools: [Write, Bash, create, powershell]
 disable-model-invocation: true
 ---
 

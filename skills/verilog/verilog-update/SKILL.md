@@ -2,7 +2,7 @@
 name: verilog-update
 description: 更新已有 Verilog 模块的文件头版本号和修改记录。用法：/verilog-update <文件路径> <版本号> <修改说明>
 argument-hint: <文件路径> <版本号如v1.1> <修改说明>
-allowed-tools: [Read, Edit, Bash]
+allowed-tools: [Read, Edit, Bash, view, edit, powershell]
 disable-model-invocation: true
 ---
 

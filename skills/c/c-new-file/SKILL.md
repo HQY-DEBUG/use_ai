@@ -2,7 +2,7 @@
 name: c-new-file
 description: 新建 C/C++ 源文件（.c/.cpp）及对应头文件（.h/.hpp），自动生成符合项目规范的文件头、include guard 和函数框架。用法：/c-new-file <文件名（不含扩展名）> [模块描述]
 argument-hint: <文件名> [模块描述]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 disable-model-invocation: true
 ---
 

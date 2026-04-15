@@ -2,7 +2,7 @@
 name: verilog-regmap
 description: 根据寄存器规格表生成 AXI-Lite 寄存器映射 Verilog 模块。用法：/verilog-regmap <模块名> <寄存器规格...>
 argument-hint: <模块名> <寄存器规格（名称:偏移:位宽:RW|RO:说明 ...）>
-allowed-tools: [Write]
+allowed-tools: [Write, create]
 ---
 
 # 生成 AXI-Lite 寄存器映射模块

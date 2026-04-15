@@ -2,7 +2,7 @@
 name: verilog-constraint
 description: 读取 Verilog 文件，生成 Vivado XDC 约束文件（pin.xdc 引脚约束 + time.xdc 时序约束）。用法：/verilog-constraint <文件路径> [主时钟频率MHz]
 argument-hint: <文件路径> [主时钟频率，默认200]
-allowed-tools: [Read, Glob, Grep, Write]
+allowed-tools: [Read, Glob, Grep, Write, view, glob, grep, create]
 disable-model-invocation: true
 ---
 

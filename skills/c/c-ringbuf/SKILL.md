@@ -2,7 +2,7 @@
 name: c-ringbuf
 description: 生成 C 语言环形缓冲区模块（适用于 DMA/UART 数据收发）。用法：/c-ringbuf <模块名> [缓冲区大小] [元素类型]
 argument-hint: <模块名> [大小，默认1024] [元素类型，默认uint8_t]
-allowed-tools: [Read, Write, Bash]
+allowed-tools: [Read, Write, Bash, view, create, powershell]
 ---
 
 # 生成 C 环形缓冲区模块

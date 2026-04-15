@@ -2,7 +2,7 @@
 name: axi-interface
 description: 生成 AXI-Lite 或 AXI-Stream 从机接口模板。用法：/axi-interface <模块名> <类型:lite|stream> [数据位宽]
 argument-hint: <模块名> <lite|stream> [数据位宽，默认32]
-allowed-tools: [Read, Write]
+allowed-tools: [Read, Write, view, create]
 disable-model-invocation: true
 ---
 

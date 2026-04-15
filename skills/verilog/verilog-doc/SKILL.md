@@ -2,7 +2,7 @@
 name: verilog-doc
 description: 从 Verilog 模块文件提取端口/参数信息，生成 Markdown 接口说明文档。用法：/verilog-doc <文件路径> [输出路径]
 argument-hint: <文件路径> [输出路径]
-allowed-tools: [Read, Write]
+allowed-tools: [Read, Write, view, create]
 ---
 
 # 生成 Verilog 模块接口文档

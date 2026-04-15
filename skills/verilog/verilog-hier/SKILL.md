@@ -2,7 +2,7 @@
 name: verilog-hier
 description: 分析多个 Verilog 文件的模块层次结构，输出调用树和依赖关系。用法：/verilog-hier <顶层模块名> <目录或文件列表>
 argument-hint: <顶层模块名> <目录或文件...>
-allowed-tools: [Read, Glob]
+allowed-tools: [Read, Glob, view, glob]
 ---
 
 # 分析 Verilog 模块层次结构

@@ -2,7 +2,7 @@
 name: qt-update
 description: 更新 Qt C++ 文件头的版本号和修改记录。用法：/qt-update <文件路径> <版本号> <修改说明>
 argument-hint: <文件路径> <版本号> <修改说明>
-allowed-tools: [Read, Edit]
+allowed-tools: [Read, Edit, view, edit]
 ---
 
 # 更新 Qt C++ 文件头版本信息
