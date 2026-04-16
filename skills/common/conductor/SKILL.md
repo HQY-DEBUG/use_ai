@@ -17,19 +17,20 @@ allowed-tools: [view, create, edit, powershell, grep, glob, sql, ask_user, task,
 | `templates/memory.md` | 初始化 `.conductor/memory.md` 时使用的标准模板 | Phase 0.1 |
 | `templates/workspace-rules.md` | 初始化 `.conductor/workspace-rules.md` 时使用的标准模板 | Phase 0.2 |
 | `templates/session_summary.md` | 上下文压缩时写入 `.conductor/session_summary.md` 使用的标准模板 | Phase 0.4 |
+| `templates/safe_points.md` | 初始化 `.conductor/safe_points.md` 时使用的标准模板 | Phase 4.3 |
 | `example/plan.md` | 完整执行计划示例（含 Verilog 奇偶校验任务），用于校准输出格式 | Phase 2.2 |
 
-**运行时自动创建的文件（无模板，由 conductor 直接生成）：**
+**运行时自动创建的文件：**
 
-| 文件 | 用途 | 创建阶段 |
-|------|------|---------|
-| `.conductor/plan.md` | 当前任务执行计划 | Phase 2.2 |
-| `.conductor/memory.md` | 跨会话架构记忆 | Phase 0.1 |
-| `.conductor/workspace-rules.md` | 工作区习惯规则 | Phase 0.2 |
-| `.conductor/session_summary.md` | 上下文压缩快照 | Phase 0.4 |
-| `.conductor/safe_points.md` | 原子提交安全点记录 | Phase 4.3 |
-| `.conductor/loop.log` | Ralph Loop 续跑日志 | Phase 5.6 |
-| `.conductor/errors/step_N_*.log` | 步骤失败诊断日志 | Phase 4.4 |
+| 文件 | 用途 | 创建阶段 | 模板 |
+|------|------|---------|------|
+| `.conductor/plan.md` | 当前任务执行计划 | Phase 2.2 | `templates/plan.md` |
+| `.conductor/memory.md` | 跨会话架构记忆 | Phase 0.1 | `templates/memory.md` |
+| `.conductor/workspace-rules.md` | 工作区习惯规则 | Phase 0.2 | `templates/workspace-rules.md` |
+| `.conductor/session_summary.md` | 上下文压缩快照 | Phase 0.4 | `templates/session_summary.md` |
+| `.conductor/safe_points.md` | 原子提交安全点记录 | Phase 4.3 | `templates/safe_points.md` |
+| `.conductor/loop.log` | Ralph Loop 续跑日志 | Phase 5.6 | 无（追加日志） |
+| `.conductor/errors/step_N_*.log` | 步骤失败诊断日志 | Phase 4.4 | 无（按需生成） |
 
 ---
 
